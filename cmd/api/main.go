@@ -2,38 +2,60 @@ package main
 
 import (
 	"context"
+	"crypto/tls"
 	"flag"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
+	"time"
 
-	"github.com/OLABALADE/TodoApp/internal/models"
-	"github.com/jackc/pgx/v5"
+	"github.com/OLABALADE/todoApp/backend/internal/models"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/cors"
 )
 
 type application struct {
 	tasks *models.TaskModel
+	users *models.UserModel
 }
+
+var db *pgxpool.Pool
 
 func main() {
 	addr := flag.String("addr", ":3000", "Port Number")
 	flag.Parse()
 
-	conn, err := pgx.Connect(context.Background(), os.Getenv("DATABASE_URL"))
+	poolConfig, err := pgxpool.ParseConfig(os.Getenv("DATABASE_URL"))
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Unable to connect to database: %v\n", err)
-		os.Exit(1)
+		log.Fatal("Unable to parse DATABASE_URL:", err)
 	}
-	defer conn.Close(context.Background())
+	db, err = pgxpool.NewWithConfig(context.Background(), poolConfig)
+	defer db.Close()
 
-	app := application{
-		tasks: &models.TaskModel{DB: conn},
+	tlsConfig := &tls.Config{
+		CurvePreferences: []tls.CurveID{tls.X25519, tls.CurveP256},
 	}
+
+	App := application{
+		tasks: &models.TaskModel{DB: db},
+		users: &models.UserModel{DB: db},
+	}
+
+	corsMid := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:5173"},
+		AllowCredentials: true,
+		AllowedMethods:   []string{"GET", "POST", "OPTIONS", "DELETE"},
+		AllowedHeaders:   []string{"*"},
+	})
 
 	server := http.Server{
-		Addr:    *addr,
-		Handler: cors.Default().Handler(app.routes()),
+		Addr:         *addr,
+		Handler:      corsMid.Handler(App.routes()),
+		TLSConfig:    tlsConfig,
+		IdleTimeout:  time.Minute,
+		ReadTimeout:  5 * time.Minute,
+		WriteTimeout: 10 * time.Second,
 	}
 
 	fmt.Println("Listening at port", server.Addr)

@@ -3,20 +3,27 @@ package models
 import (
 	"context"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"time"
 )
 
 type Task struct {
-	ID          int
-	Title       string
-	Description string
-	Author      string
-	Created     time.Time
-	Completed   bool
+	ID          int       `json:"id"`
+	Title       string    `json:"title"`
+	Description string    `json:"desc"`
+	Author      string    `json:"author"`
+	Created     time.Time `json:"created"`
+	Completed   bool      `json:"completed"`
+}
+
+type TaskForm struct {
+	Title  string `json:"title"`
+	Desc   string `json:"desc"`
+	Author string `json:"username"`
 }
 
 type TaskModel struct {
-	DB *pgx.Conn
+	DB *pgxpool.Pool
 }
 
 func (m *TaskModel) Get(id int) (*Task, error) {
@@ -30,14 +37,19 @@ func (m *TaskModel) Get(id int) (*Task, error) {
 	return t, nil
 }
 
-func (m *TaskModel) Insert(title, description, author string) error {
+func (m *TaskModel) Insert(title, description, author string) (int, error) {
 	stmt := `INSERT INTO tasks(title, description, author, created, completed) 
-  VALUES($1, $2, $3,current_timestamp, false)`
-	_, err := m.DB.Exec(context.Background(), stmt, title, description, author)
+  VALUES($1, $2, $3,current_timestamp, false) returning id;`
+	result, err := m.DB.Query(context.Background(), stmt, title, description, author)
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+
+	rows, err := pgx.CollectRows(result, pgx.RowTo[int])
+	if err != nil {
+		return 0, err
+	}
+	return rows[0], nil
 }
 
 func (m *TaskModel) Delete(id int) error {
@@ -58,10 +70,10 @@ func (m *TaskModel) Update(id int) error {
 	return nil
 }
 
-func (m *TaskModel) Undone() ([]*Task, error) {
+func (m *TaskModel) CurrentTasks(author string) ([]*Task, error) {
 	stmt := `SELECT id, title, description, author, created ,completed 
-  from tasks where completed = false order by id`
-	rows, err := m.DB.Query(context.Background(), stmt)
+  from tasks where author = $1 order by id`
+	rows, err := m.DB.Query(context.Background(), stmt, author)
 	if err != nil {
 		return nil, err
 	}
