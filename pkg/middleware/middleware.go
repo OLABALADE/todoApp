@@ -12,7 +12,7 @@ import (
 type Middleware struct{}
 type ContextKey string
 
-var emailKey ContextKey = "email"
+var idKey ContextKey = "userID"
 
 func (m Middleware) Auth(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -39,7 +39,8 @@ func (m Middleware) Auth(next http.HandlerFunc) http.HandlerFunc {
 				return
 			}
 		}
-		r = r.WithContext(context.WithValue(r.Context(), emailKey, claims.Email))
+
+		r = r.WithContext(context.WithValue(r.Context(), idKey, claims.UserId))
 
 		next.ServeHTTP(w, r)
 	})

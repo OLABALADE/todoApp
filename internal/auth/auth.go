@@ -15,14 +15,16 @@ type Credentials struct {
 var jwtKey = []byte(os.Getenv("SECRET_KEY"))
 
 type Claims struct {
-	Email string
+	UserId int
+	Email  string
 	jwt.StandardClaims
 }
 
-func GenerateToken(credentials *Credentials) (string, error) {
+func GenerateToken(credentials *Credentials, userId int) (string, error) {
 	expirationTime := time.Now().Add(5 * time.Minute)
 	claims := &Claims{
-		Email: credentials.Email,
+		UserId: userId,
+		Email:  credentials.Email,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expirationTime.Unix(),
 		},

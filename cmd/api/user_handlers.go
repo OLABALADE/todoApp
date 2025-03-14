@@ -6,8 +6,10 @@ import (
 	"github.com/OLABALADE/todoApp/backend/internal/auth"
 	"github.com/OLABALADE/todoApp/backend/internal/models"
 	"github.com/OLABALADE/todoApp/backend/pkg/middleware"
+	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -18,36 +20,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (app *application) dashboard(w http.ResponseWriter, r *http.Request) {
-	email, ok := r.Context().Value(middleware.ContextKey("email")).(string)
-	if !ok {
-		log.Println("No email present")
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	user, err := app.users.GetUser(email)
-
-	if err != nil {
-		log.Println("No user found with such email:", email, err)
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
-		return
-	}
-
-	tasks, err := app.tasks.CurrentTasks(user.Name)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, "Unauthorized ", http.StatusUnauthorized)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(tasks)
-
-}
-
-func (app *application) signup(w http.ResponseWriter, r *http.Request) {
+func (app *application) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var cred auth.Credentials
 	if err := json.NewDecoder(r.Body).Decode(&cred); err != nil {
 		log.Println("Could not create user:", err)
@@ -80,7 +53,7 @@ func (app *application) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cred.Username, err = app.users.Authenticate(cred.Email, cred.Password)
+	userId, err := app.users.Authenticate(cred.Email, cred.Password)
 	if err != nil {
 		if errors.Is(err, models.ErrInvalidCredential) {
 			http.Error(w, "Invalid Credentials", http.StatusBadRequest)
@@ -91,7 +64,14 @@ func (app *application) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := auth.GenerateToken(&cred)
+	user, err := app.users.GetUser(userId)
+	if err != nil {
+		log.Println("Failed to get user:", err)
+		http.Error(w, "Failed to login user", http.StatusInternalServerError)
+		return
+	}
+
+	token, err := auth.GenerateToken(&cred, user.Id)
 	if err != nil {
 		http.Error(w, "Error generating token", http.StatusInternalServerError)
 		return
@@ -114,4 +94,47 @@ func (app *application) login(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (app *application) logout(w http.ResponseWriter, r *http.Request) {}
+func (app *application) GetUser(w http.ResponseWriter, r *http.Request) {
+	userId, _ := r.Context().Value(middleware.ContextKey("userID")).(int)
+
+	user, err := app.users.GetUser(userId)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Failed to get user details", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(user)
+}
+
+func (app *application) GetUsers(w http.ResponseWriter, r *http.Request) {
+	users, err := app.users.GetUsers()
+	if err != nil {
+		log.Println("Failed to get users:", err)
+		http.Error(w, "Could not get Users", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(users)
+}
+
+func (app *application) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, _ := vars["userID"]
+
+	userId, err := strconv.Atoi(id)
+	if err != nil {
+		http.Error(w, "Invalid Request", http.StatusBadRequest)
+		return
+	}
+
+	err = app.users.Delete(userId)
+	if err != nil {
+		log.Println("Failed to delete user:", err)
+		http.Error(w, "Failed to delete user", http.StatusInternalServerError)
+		return
+	}
+	w.Write([]byte("User successfully deleted"))
+}
+
+func (app *application) UpdateUser(w http.ResponseWriter, r *http.Request) {}

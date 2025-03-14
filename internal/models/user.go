@@ -3,35 +3,60 @@ package models
 import (
 	"context"
 	"errors"
-	"time"
-
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"golang.org/x/crypto/bcrypt"
+	"time"
 )
 
 type User struct {
-	Id       int
-	Name     string
-	Email    string
-	Password []byte
-	Created  time.Time
+	Id       int       `json:"user_id"`
+	Name     string    `json:"name"`
+	Email    string    `json:"email"`
+	Password []byte    `json:"password"`
+	Created  time.Time `json:"created_at"`
 }
 
 type UserModel struct {
 	DB *pgxpool.Pool
 }
 
-func (m *UserModel) GetUser(email string) (*User, error) {
-	stmt := "SELECT * FROM users WHERE email = $1"
-	row := m.DB.QueryRow(context.Background(), stmt, email)
+func (m *UserModel) GetUser(id int) (*User, error) {
+	stmt := "select * from users where id = $1"
+	row := m.DB.QueryRow(context.Background(), stmt, id)
 	user := &User{}
-	err := row.Scan(&user.Id, &user.Name, &user.Email, &user.Password, &user.Created)
+	err := row.Scan(
+		&user.Id,
+		&user.Name,
+		&user.Email,
+		&user.Password,
+		&user.Created,
+	)
 	if err != nil {
 		return &User{}, err
 	}
 
 	return user, nil
+}
+
+func (m *UserModel) GetUsers() ([]*User, error) {
+	stmt := `select id, name from users`
+	rows, err := m.DB.Query(context.Background(), stmt)
+	if err != nil {
+		return nil, err
+	}
+
+	users := []*User{}
+	for rows.Next() {
+		u := &User{}
+		err = rows.Scan(&u.Id, &u.Name)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, u)
+	}
+
+	return users, nil
 }
 
 func (m *UserModel) Insert(name, email, password string) error {
@@ -40,8 +65,8 @@ func (m *UserModel) Insert(name, email, password string) error {
 	if err != nil {
 		return err
 	}
-	stmt := `INSERT INTO users(name, email, password, created) 
-  VALUES($1, $2, $3, current_timestamp)`
+	stmt := `insert into users(name, email, password, created) 
+  values($1, $2, $3)`
 
 	_, err = m.DB.Exec(context.Background(), stmt, name, email, string(hashedPassword))
 	if err != nil {
@@ -51,27 +76,40 @@ func (m *UserModel) Insert(name, email, password string) error {
 	return nil
 }
 
-func (m *UserModel) Authenticate(email, password string) (string, error) {
-	var hashed_password []byte
-	username := ""
-	stmt := `SELECT name, password from users WHERE email = $1`
+func (m *UserModel) Delete(id int) error {
+	stmt := `delete from users where id = $1`
+	_, err := m.DB.Exec(context.Background(), stmt, id)
+	if err != nil {
+		return err
+	}
+	return nil
+}
 
-	err := m.DB.QueryRow(context.Background(), stmt, email).Scan(&username, &hashed_password)
+func (m *UserModel) Update(id int) error {
+	return nil
+}
+
+func (m *UserModel) Authenticate(email, password string) (int, error) {
+	var hashed_password []byte
+	userId := 0
+	stmt := `select id, password from users where email = $1`
+
+	err := m.DB.QueryRow(context.Background(), stmt, email).Scan(&userId, &hashed_password)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
-			return "", ErrInvalidCredential
+			return 0, ErrInvalidCredential
 		} else {
-			return "", err
+			return 0, err
 		}
 	}
 
 	err = bcrypt.CompareHashAndPassword(hashed_password, []byte(password))
 	if err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-			return "", ErrInvalidCredential
+			return 0, ErrInvalidCredential
 		} else {
-			return "", err
+			return 0, err
 		}
 	}
-	return username, nil
+	return userId, nil
 }
