@@ -8,21 +8,48 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 )
 
-func (app *application) CreatePersonalTask(w http.ResponseWriter, r *http.Request) {
-	userId, _ := r.Context().Value(middleware.ContextKey("id")).(int)
+type TaskRequest struct {
+	Title       string `json:"title"`
+	Description string `json:"description"`
+	Type        string `json:"taskType"`
+	Status      string `json:"status"`
+	Priority    string `json:"priority"`
+	DueDate     string `json:"dueDate"`
+	TeamId      int    `json:"teamId"`
+	ProjectId   int    `json:"projectId"`
+}
 
-	tf := &models.Task{}
-	err := json.NewDecoder(r.Body).Decode(tf)
+func (app *application) CreatePersonalTask(w http.ResponseWriter, r *http.Request) {
+	userId, _ := r.Context().Value(middleware.ContextKey("userID")).(int)
+
+	tr := &TaskRequest{}
+	err := json.NewDecoder(r.Body).Decode(tr)
 	if err != nil {
 		log.Println("Could not decode json request:", err)
 		http.Error(w, "400 - Bad Request", http.StatusBadRequest)
 		return
 	}
 
-	tf.CreatorId = userId
-	taskId, err := app.tasks.InsertPersonalTask(tf)
+	newTask := &models.Task{
+		Title:       tr.Title,
+		Description: tr.Description,
+		Type:        tr.Type,
+		Status:      tr.Status,
+		Priority:    tr.Priority,
+		CreatorId:   userId,
+	}
+
+	newTask.DueDate, err = time.Parse("2006-01-02", tr.DueDate)
+	if err != nil {
+		log.Println("Failed to parse date:", err)
+		http.Error(w, "Failed parse date", http.StatusBadRequest)
+		return
+	}
+
+	taskId, err := app.tasks.InsertPersonalTask(newTask)
 	if err != nil {
 		log.Println("Personal Task not created:", err)
 		http.Error(w, "Personal Task not created", http.StatusNotImplemented)
@@ -31,7 +58,7 @@ func (app *application) CreatePersonalTask(w http.ResponseWriter, r *http.Reques
 
 	lastTask, err := app.tasks.GetPersonalTask(taskId)
 	if err != nil {
-		log.Println("Failed to fetch newly created task")
+		log.Println("Failed to fetch newly created task:", err)
 		http.Error(w, "Failed to fetch newly created task", http.StatusInternalServerError)
 		return
 	}
@@ -45,7 +72,7 @@ func (app *application) CreatePersonalTask(w http.ResponseWriter, r *http.Reques
 }
 
 func (app *application) GetPersonalTasks(w http.ResponseWriter, r *http.Request) {
-	userId, _ := r.Context().Value(middleware.ContextKey("id")).(int)
+	userId, _ := r.Context().Value(middleware.ContextKey("userID")).(int)
 
 	personalTasks, err := app.tasks.GetPersonalTasks(userId)
 	if err != nil {
@@ -122,17 +149,32 @@ func (app *application) CreateProjectTask(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	task := &models.Task{}
-	err := json.NewDecoder(r.Body).Decode(task)
+	tr := &TaskRequest{}
+	err := json.NewDecoder(r.Body).Decode(tr)
 	if err != nil {
 		http.Error(w, "Invalid Request body", http.StatusBadRequest)
 		return
 	}
 
-	task.TeamId = teamId
-	task.ProjectId = projectId
-	task.CreatorId = userId
-	project, err := app.tasks.InsertProjectTask(task)
+	newTask := &models.Task{
+		Title:       tr.Title,
+		Description: tr.Description,
+		Type:        tr.Type,
+		Status:      tr.Status,
+		Priority:    tr.Priority,
+		TeamId:      teamId,
+		ProjectId:   projectId,
+		CreatorId:   userId,
+	}
+
+	newTask.DueDate, err = time.Parse("2006-01-02", tr.DueDate)
+	if err != nil {
+		log.Println("Failed to parse date:", err)
+		http.Error(w, "Failed parse date", http.StatusBadRequest)
+		return
+	}
+
+	project, err := app.tasks.InsertProjectTask(newTask)
 	if err != nil {
 		log.Println("Failed to create project task:", err)
 		http.Error(w, "Failed to create project tasks", http.StatusInternalServerError)

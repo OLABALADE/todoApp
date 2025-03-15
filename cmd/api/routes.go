@@ -9,9 +9,10 @@ func (app *application) routes() *mux.Router {
 	mid := middleware.Middleware{}
 	mux := mux.NewRouter()
 	mux.HandleFunc("/", app.home).Methods("GET")
+	mux.HandleFunc("/api/auth/verify-token", app.VerifyToken).Methods("GET")
 
-	mux.HandleFunc("/api/users/register", mid.Auth(app.CreateUser)).Methods("POST")
-	mux.HandleFunc("/api/users/login", mid.Auth(app.login)).Methods("POST")
+	mux.HandleFunc("/api/users/register", app.CreateUser).Methods("POST")
+	mux.HandleFunc("/api/users/login", app.Login).Methods("POST")
 
 	mux.HandleFunc("/api/users/me", mid.Auth(app.GetUser)).Methods("GET")
 	mux.HandleFunc("/api/users", mid.Auth(app.GetUsers)).Methods("GET")

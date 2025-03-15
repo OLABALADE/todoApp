@@ -1,43 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import Task, { TaskForm, TaskList } from '../components/Task';
+import Task, { TaskList } from '../components/Task';
+import { TaskForm } from '../components/Form';
+import NavBar from '../components/NavBar';
 
 export default function Dashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const [tasks, setTasks] = useState([]);
-  const username = localStorage.getItem("username")
-  const addTask = (newTask) => {
-    setTasks((prev) => [...prev, newTask])
-  }
-  const deleteTask = (id) => {
-    const newTasks = tasks.filter(task => task.id !== id);
-    setTasks(newTasks);
+  const username = localStorage.getItem("username");
+  const checkAuthentication = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/api/auth/verify-token", {
+        method: "GET",
+        credentials: "include"
+      })
+      if (response.ok) {
+        return true
+      }
+      return false
+    } catch (err) {
+      console.log(err)
+      return
+    }
   }
 
   useEffect(() => {
-    fetch("http://localhost:3000/user/dashboard", {
-      credentials: "include",
-    })
-      .then(res => res.json())
-      .then(data => {
-        setTasks(data)
-        setIsAuthenticated(true)
-      })
-      .catch(err => {
-        return (
-          <p> You are not logged in.Click here to <Link to="/login">Login</Link></p>
-        )
-      })
-  }, []);
+    const fetchAuthStatus = async () => {
+      const authenticated = await checkAuthentication();
+      setIsAuthenticated(authenticated)
+    }
+    fetchAuthStatus();
+  }, [])
 
   if (!isAuthenticated) {
     return <p> You are not logged in.Click here to <Link to="/login">Login</Link></p>
   } else {
     return (
       <div className="Dashboard">
+        <NavBar />
         <h1>Hello {username}</h1>
-        <TaskList tasks={tasks} deleteTask={deleteTask} />
-        <TaskForm username={username} addTask={addTask} />
       </div>
     );
   }

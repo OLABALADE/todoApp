@@ -9,10 +9,10 @@ export default function Signup() {
   const navigate = useNavigate();
 
   const login = (email, password) => {
-    fetch("http://localhost:3000/user/login", {
+    fetch("http://localhost:3000/api/users/login", {
       method: "POST",
       headers: { "Content-type": "application/json" },
-      body: JSON.stringify({ username, email, password }),
+      body: JSON.stringify({ email, password }),
       credentials: "include",
     })
       .then(res => res.json())
@@ -29,7 +29,7 @@ export default function Signup() {
 
   const handleSignup = (e) => {
     e.preventDefault();
-    fetch("http://localhost:3000/user/signup", {
+    fetch("http://localhost:3000/api/users/register", {
       method: "POST",
       headers: { "Content-type": "application/json" },
       body: JSON.stringify({ username, email, password })

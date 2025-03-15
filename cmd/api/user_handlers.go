@@ -20,6 +20,11 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (app *application) VerifyToken(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte("Token is valid"))
+}
+
 func (app *application) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var cred auth.Credentials
 	if err := json.NewDecoder(r.Body).Decode(&cred); err != nil {
@@ -44,7 +49,7 @@ func (app *application) CreateUser(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (app *application) login(w http.ResponseWriter, r *http.Request) {
+func (app *application) Login(w http.ResponseWriter, r *http.Request) {
 	var cred auth.Credentials
 	err := json.NewDecoder(r.Body).Decode(&cred)
 	if err != nil {
@@ -80,7 +85,7 @@ func (app *application) login(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     "token",
 		Value:    token,
-		Expires:  time.Now().Add(5 * time.Minute),
+		Expires:  time.Now().Add(60 * time.Minute),
 		HttpOnly: true,
 		Secure:   true,
 		Path:     "/",

@@ -10,7 +10,7 @@ export default function Login() {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    fetch("http://localhost:3000/user/login", {
+    fetch("http://localhost:3000/api/users/login", {
       method: "POST",
       headers: {
         "Content-type": "application/json"
