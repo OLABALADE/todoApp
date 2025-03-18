@@ -8,15 +8,15 @@ import (
 )
 
 type Team struct {
-	Id          int       `json:"team_id"`
+	Id          int       `json:"teamId"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
 	Creator     string    `json:"creator"`
-	Created     time.Time `json:"created_at"`
+	Created     time.Time `json:"created"`
 }
 
 type Member struct {
-	Id   int    `json:"userID"`
+	Id   int    `json:"userId"`
 	Name string `json:"name"`
 	Role string `json:"role"`
 }
@@ -26,8 +26,8 @@ type TeamModel struct {
 }
 
 func (m *TeamModel) Insert(name, desc string, creatorId int) (int, error) {
-	stmt := `insert into teams(name, description, creatorId, created_at) 
-  values($1, $2, $3, current_timestamp) returning id`
+	stmt := `insert into teams(name, description, creator_id) 
+  values($1, $2, $3) returning id`
 
 	results, err := m.DB.Query(context.Background(), stmt, name, desc, creatorId)
 	if err != nil {
@@ -66,7 +66,7 @@ func (m *TeamModel) Delete(id int) error {
 }
 
 func (m *TeamModel) GetTeams(userId int) ([]*Team, error) {
-	stmt := `select t.id, t.name from teams
+	stmt := `select t.id, t.name from teams t
   join team_members tm on t.id = tm.team_id where tm.user_id = $1`
 
 	rows, err := m.DB.Query(context.Background(), stmt, userId)

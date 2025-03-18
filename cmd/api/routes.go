@@ -35,6 +35,12 @@ func (app *application) routes() *mux.Router {
 	mux.HandleFunc("/api/teams/{teamID}/members", mid.Auth(app.GetTeamMembers)).Methods("GET")
 	mux.HandleFunc("/api/teams/{teamID}/members/{userID}", mid.Auth(app.RemoveMemberFromTeam)).Methods("DELETE")
 
+	mux.HandleFunc("/api/teams/{teamID}/tasks", mid.Auth(app.CreateTeamTask)).Methods("POST")
+	mux.HandleFunc("/api/teams/{teamID}/tasks", mid.Auth(app.GetTeamTasks)).Methods("GET")
+	mux.HandleFunc("/api/teams/{teamID}/tasks/{taskID}", mid.Auth(app.GetTeamTask)).Methods("GET")
+	mux.HandleFunc("/api/teams/{teamID}/tasks/{taskID}", mid.Auth(app.UpdateTeamTask)).Methods("GET")
+	mux.HandleFunc("/api/teams/{teamID}/tasks/{taskID}", mid.Auth(app.DeleteTeamTask)).Methods("GET")
+
 	mux.HandleFunc("/api/teams/{teamID}/projects", mid.Auth(app.CreateProject)).Methods("POST")
 	mux.HandleFunc("/api/teams/{teamID}/projects", mid.Auth(app.GetProjects)).Methods("GET")
 	mux.HandleFunc("/api/teams/{teamID}/projects/{projectID}", mid.Auth(app.GetProject)).Methods("GET")

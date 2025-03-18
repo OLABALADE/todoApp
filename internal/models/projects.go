@@ -10,9 +10,9 @@ import (
 type Project struct {
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
-	TeamId      int       `json:"team_id"`
-	CreatorId   int       `json:"creator_id"`
-	Created     time.Time `json:"created_at"`
+	TeamId      int       `json:"teamId"`
+	CreatorId   int       `json:"creatorId"`
+	Created     time.Time `json:"created"`
 }
 
 type ProjectModel struct {

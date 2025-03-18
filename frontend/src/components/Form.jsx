@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export function TaskForm({ taskType, teamId, projectId, addTask }) {
+export function TaskForm({ url, taskType, addTask }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [status, setStatus] = useState("pending");
@@ -10,7 +10,7 @@ export function TaskForm({ taskType, teamId, projectId, addTask }) {
   const handleSubmit = async (e) => {
     try {
       e.preventDefault();
-      const response = await fetch("http://localhost:3000/api/tasks", {
+      const response = await fetch(url, {
         method: "POST",
         headers: {
           "Content-type": "application/json"
@@ -22,8 +22,6 @@ export function TaskForm({ taskType, teamId, projectId, addTask }) {
           taskType,
           status,
           priority,
-          teamId,
-          projectId,
           dueDate,
         })
       })
@@ -83,23 +81,28 @@ export function TaskForm({ taskType, teamId, projectId, addTask }) {
 
 export function TeamForm({ addTeam }) {
   const [name, setName] = useState("");
-  const [desc, setDesc] = useState("");
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    fetch("http://localhost:3000/team/create", {
-      method: "POST",
-      headers: { "Content-type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ name, desc })
-    })
-      .then(res => res.json())
-      .then(newTeam => {
-        addTeam(team);
-        setName("");
-        setDesc("");
+  const [description, setDescription] = useState("");
+  const handleSubmit = async (e) => {
+    try {
+      e.preventDefault();
+      const response = await fetch("http://localhost:3000/api/teams", {
+        method: "POST",
+        headers: { "Content-type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          name,
+          description,
+        })
       })
-      .catch(err => console.log(err))
+      const data = await response.json();
+      addTeam(data);
+      setName("");
+      setDescription("");
+    } catch (err) {
+      console.log(err);
+    }
   }
+
   return (
     <div className="teamForm">
       <h1> Create Team </h1>
@@ -111,12 +114,58 @@ export function TeamForm({ addTeam }) {
           onChange={(e) => setName(e.target.value)}
         />
         <textarea
-          value={desc}
+          value={description}
           placeholder="Description"
-          onChange={(e) => setDesc(e.target.value)}
+          onChange={(e) => setDescription(e.target.value)}
         />
         <button type="submit"> Create Team </button>
       </form>
     </div>
   )
 }
+
+export function ProjectForm({ teamId, addProject }) {
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+
+  const handleSubmit = async (e) => {
+    try {
+      e.preventDefault();
+      const response = await fetch(`http://localhost:3000/api/teams/${teamId}/projects`, {
+        method: "POST",
+        credentials: "include",
+        body: JSON.stringify({
+          name,
+          description,
+          teamId,
+        })
+      })
+      const data = await response.json()
+      addProject(data);
+      setName("");
+      setDescription("");
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  return (
+    <div>
+      <h2> Create Project </h2>
+      <input
+        type="text"
+        value={name}
+        placeholder="Name"
+        onChange={(e) => setName(e.target.value)}
+      />
+
+      <input
+        type="text"
+        value={description}
+        placeholder="Description"
+        onChange={(e) => setDescription(e.target.value)}
+      />
+      <button onClick={handleSubmit}> Create Project </button>
+    </div>
+  )
+}  

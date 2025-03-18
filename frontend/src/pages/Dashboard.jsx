@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Task, { TaskList } from '../components/Task';
 import { TaskForm } from '../components/Form';
-import NavBar from '../components/NavBar';
+import Sidebar from '../components/NavBar';
 
 export default function Dashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -36,7 +36,7 @@ export default function Dashboard() {
   } else {
     return (
       <div className="Dashboard">
-        <NavBar />
+        <Sidebar />
         <h1>Hello {username}</h1>
       </div>
     );

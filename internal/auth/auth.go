@@ -21,7 +21,7 @@ type Claims struct {
 }
 
 func GenerateToken(credentials *Credentials, userId int) (string, error) {
-	expirationTime := time.Now().Add(5 * time.Minute)
+	expirationTime := time.Now().Add(60 * time.Minute)
 	claims := &Claims{
 		UserId: userId,
 		Email:  credentials.Email,

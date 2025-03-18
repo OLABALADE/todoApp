@@ -10,11 +10,11 @@ import (
 )
 
 type User struct {
-	Id       int       `json:"user_id"`
+	Id       int       `json:"userId"`
 	Name     string    `json:"name"`
 	Email    string    `json:"email"`
 	Password []byte    `json:"password"`
-	Created  time.Time `json:"created_at"`
+	Created  time.Time `json:"created"`
 }
 
 type UserModel struct {
@@ -65,7 +65,7 @@ func (m *UserModel) Insert(name, email, password string) error {
 	if err != nil {
 		return err
 	}
-	stmt := `insert into users(name, email, password, created) 
+	stmt := `insert into users(name, email, password) 
   values($1, $2, $3)`
 
 	_, err = m.DB.Exec(context.Background(), stmt, name, email, string(hashedPassword))
@@ -91,7 +91,7 @@ func (m *UserModel) Update(id int) error {
 
 func (m *UserModel) Authenticate(email, password string) (int, error) {
 	var hashed_password []byte
-	userId := 0
+	var userId int
 	stmt := `select id, password from users where email = $1`
 
 	err := m.DB.QueryRow(context.Background(), stmt, email).Scan(&userId, &hashed_password)

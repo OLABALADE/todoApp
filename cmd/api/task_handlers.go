@@ -136,6 +136,118 @@ func (app *application) DeletePersonalTask(w http.ResponseWriter, r *http.Reques
 	}
 }
 
+// ////////////////////// Team Tasks /////////////////////////
+func (app *application) CreateTeamTask(w http.ResponseWriter, r *http.Request) {
+	userId, _ := r.Context().Value(middleware.ContextKey("userID")).(int)
+	tId, _ := mux.Vars(r)["teamID"]
+	teamId, err := strconv.Atoi(tId)
+	if err != nil {
+		http.Error(w, "Invalid URL", http.StatusBadRequest)
+		return
+	}
+
+	tr := &TaskRequest{}
+	err = json.NewDecoder(r.Body).Decode(tr)
+	if err != nil {
+		http.Error(w, "Invalid Request body", http.StatusBadRequest)
+		return
+	}
+
+	newTask := &models.Task{
+		Title:       tr.Title,
+		Description: tr.Description,
+		Type:        tr.Type,
+		Status:      tr.Status,
+		Priority:    tr.Priority,
+		TeamId:      teamId,
+		CreatorId:   userId,
+	}
+
+	newTask.DueDate, err = time.Parse("2006-01-02", tr.DueDate)
+	if err != nil {
+		log.Println("Failed to parse date:", err)
+		http.Error(w, "Failed parse date", http.StatusBadRequest)
+		return
+	}
+
+	taskId, err := app.tasks.InsertTeamTask(newTask)
+	if err != nil {
+		log.Println("Failed to create project task:", err)
+		http.Error(w, "Failed to create project tasks", http.StatusInternalServerError)
+		return
+	}
+
+	task, err := app.tasks.GetTeamTask(teamId, taskId)
+	if err != nil {
+		log.Println("Failed to get newly added task:", err)
+		http.Error(w, "Failed to return newly added tasks", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(task)
+}
+
+func (app *application) GetTeamTasks(w http.ResponseWriter, r *http.Request) {
+	tId, _ := mux.Vars(r)["teamID"]
+	teamId, err := strconv.Atoi(tId)
+	if err != nil {
+		http.Error(w, "Invalid URL", http.StatusBadRequest)
+		return
+	}
+
+	tasks, err := app.tasks.GetTeamTasks(teamId)
+	if err != nil {
+		log.Println("Failed to get team tasks:", err)
+		http.Error(w, "Error while fetching team tasks", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(tasks)
+}
+func (app *application) GetTeamTask(w http.ResponseWriter, r *http.Request) {
+	tmId, _ := mux.Vars(r)["teamID"]
+	tkId, _ := mux.Vars(r)["taskID"]
+
+	teamId, err1 := strconv.Atoi(tmId)
+	taskId, err2 := strconv.Atoi(tkId)
+
+	if err1 != nil || err2 != nil {
+		http.Error(w, "Invalid URL", http.StatusBadRequest)
+		return
+	}
+
+	task, err := app.tasks.GetTeamTask(teamId, taskId)
+	if err != nil {
+		log.Println("Failed to get team task:", err)
+		http.Error(w, "Failed to get team task", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(task)
+}
+
+func (app *application) UpdateTeamTask(w http.ResponseWriter, r *http.Request) {}
+
+func (app *application) DeleteTeamTask(w http.ResponseWriter, r *http.Request) {
+	tmId, _ := mux.Vars(r)["teamID"]
+	tkId, _ := mux.Vars(r)["taskID"]
+
+	teamId, err1 := strconv.Atoi(tmId)
+	taskId, err2 := strconv.Atoi(tkId)
+
+	if err1 != nil || err2 != nil {
+		http.Error(w, "Invalid URL", http.StatusBadRequest)
+		return
+	}
+
+	err := app.tasks.DeleteTeamTask(teamId, taskId)
+	if err != nil {
+		log.Println("Failed to delete team task:", err)
+		http.Error(w, "Failed to delete team task", http.StatusInternalServerError)
+		return
+	}
+}
+
 // //////////////////// Project Tasks //////////////////////////
 func (app *application) CreateProjectTask(w http.ResponseWriter, r *http.Request) {
 	userId, _ := r.Context().Value(middleware.ContextKey("userID")).(int)
@@ -144,7 +256,7 @@ func (app *application) CreateProjectTask(w http.ResponseWriter, r *http.Request
 
 	teamId, err1 := strconv.Atoi(tId)
 	projectId, err2 := strconv.Atoi(pId)
-	if err1 != nil && err2 != nil {
+	if err1 != nil || err2 != nil {
 		http.Error(w, "Invalid URL", http.StatusBadRequest)
 		return
 	}
@@ -193,7 +305,7 @@ func (app *application) GetProjectTask(w http.ResponseWriter, r *http.Request) {
 	teamId, err1 := strconv.Atoi(tmId)
 	projectId, err2 := strconv.Atoi(pId)
 	taskId, err3 := strconv.Atoi(tkId)
-	if err1 != nil && err2 != nil && err3 != nil {
+	if err1 != nil || err2 != nil || err3 != nil {
 		http.Error(w, "Invalid URL", http.StatusBadRequest)
 		return
 	}
@@ -215,7 +327,7 @@ func (app *application) GetProjectTasks(w http.ResponseWriter, r *http.Request) 
 
 	teamId, err1 := strconv.Atoi(tId)
 	projectId, err2 := strconv.Atoi(pId)
-	if err1 != nil && err2 != nil {
+	if err1 != nil || err2 != nil {
 		http.Error(w, "Invalid URL", http.StatusBadRequest)
 		return
 	}
@@ -238,7 +350,7 @@ func (app *application) DeleteProjectTask(w http.ResponseWriter, r *http.Request
 	teamId, err1 := strconv.Atoi(tmId)
 	projectId, err2 := strconv.Atoi(pId)
 	taskId, err3 := strconv.Atoi(tkId)
-	if err1 != nil && err2 != nil && err3 != nil {
+	if err1 != nil || err2 != nil || err3 != nil {
 		http.Error(w, "Invalid URL", http.StatusBadRequest)
 		return
 	}

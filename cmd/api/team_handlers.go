@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/OLABALADE/todoApp/backend/internal/models"
 	"github.com/OLABALADE/todoApp/backend/pkg/middleware"
 	"github.com/gorilla/mux"
 	"log"
@@ -14,23 +13,37 @@ type MemberRequest struct {
 	UserId int `json:"user_id"`
 }
 
+type TeamRequest struct {
+	Id          int    `json:"teamId"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
 func (app *application) CreateTeam(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value(middleware.ContextKey("userID")).(int)
-	nt := &models.Team{}
-	err := json.NewDecoder(r.Body).Decode(nt)
+	tr := &TeamRequest{}
+	err := json.NewDecoder(r.Body).Decode(tr)
 	if err != nil {
 		http.Error(w, "Could not create team", http.StatusBadRequest)
 		return
 	}
 
-	id, err := app.teams.Insert(nt.Name, nt.Description, userId)
+	teamId, err := app.teams.Insert(tr.Name, tr.Description, userId)
 	if err != nil {
-		log.Println(err)
+		log.Println("Failed to create team:", err)
 		http.Error(w, "Error occured while creating team", http.StatusInternalServerError)
 		return
 	}
 
-	team, err := app.teams.GetTeam(id)
+	err = app.teams.AddMember(teamId, userId)
+	if err != nil {
+		log.Println("Failed to add team creator as a member:", err)
+		http.Error(w, "Error occured while creating team", http.StatusInternalServerError)
+		return
+
+	}
+
+	team, err := app.teams.GetTeam(teamId)
 	if err != nil {
 		log.Println("Could not get newly created team:", err)
 		http.Error(w, "Could not get newly created team", http.StatusInternalServerError)
@@ -66,7 +79,7 @@ func (app *application) GetTeam(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) GetUserTeams(w http.ResponseWriter, r *http.Request) {
-	userId, _ := r.Context().Value(middleware.ContextKey("userId")).(int)
+	userId, _ := r.Context().Value(middleware.ContextKey("userID")).(int)
 
 	teams, err := app.teams.GetTeams(userId)
 	if err != nil {

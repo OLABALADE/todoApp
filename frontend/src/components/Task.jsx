@@ -1,4 +1,4 @@
-export default function Task({ id, title, desc, status, priority, dueDate, creator, created, deleteTask }) {
+export default function Task({ id, title, desc, status, priority, dueDate, teamId, projectId, creator, created, deleteTask }) {
   const handleDelete = async (e) => {
     try {
       e.preventDefault();
@@ -22,7 +22,7 @@ export default function Task({ id, title, desc, status, priority, dueDate, creat
       <p className='status'> Status: {status} </p>
       <p className='priority'> Priority: {priority} </p>
       <p className='dueDate'> Due Date: {dueDate} </p>
-      <p className='created'> At {created} </p>
+      <p className='creator'> Created by :{creator} </p>
       <button onClick={handleDelete}>X</button>
     </div>
   )
@@ -37,7 +37,7 @@ export function TaskList({ tasks, deleteTask }) {
           id={task.id}
           title={task.title}
           desc={task.description}
-          author={task.creator}
+          creator={task.creator}
           created={task.created}
           status={task.status}
           priority={task.priority}

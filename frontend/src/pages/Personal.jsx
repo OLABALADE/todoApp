@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { TaskList } from "../components/Task";
 import { TaskForm } from "../components/Form";
-import NavBar from "../components/NavBar";
+import Sidebar from "../components/NavBar";
 
 export default function Personal() {
   const [personalTasks, setPersonalTasks] = useState([]);
   const [message, setMessage] = useState("");
+  const url = "http://localhost:3000/api/tasks"
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -34,10 +35,10 @@ export default function Personal() {
 
   return (
     <div>
-      <NavBar />
+      <Sidebar />
       <h1> My tasks </h1>
       <TaskList tasks={personalTasks} deleteTask={deletePersonalTask} />
-      <TaskForm taskType={"personal"} addTask={addPersonalTask} />
+      <TaskForm url={url} taskType={"personal"} addTask={addPersonalTask} />
       <p> {message} </p>
     </div>
   )
