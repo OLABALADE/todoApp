@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { TaskList } from "../components/Task";
 import { TaskForm } from "../components/Form";
-import Sidebar from "../components/NavBar";
+import Sidebar from "../components/Sidebar";
 
 export default function Personal() {
   const [personalTasks, setPersonalTasks] = useState([]);
@@ -34,12 +34,13 @@ export default function Personal() {
   }
 
   return (
-    <div>
+    <div className="flex min-h-screen">
       <Sidebar />
-      <h1> My tasks </h1>
-      <TaskList tasks={personalTasks} deleteTask={deletePersonalTask} />
-      <TaskForm url={url} taskType={"personal"} addTask={addPersonalTask} />
-      <p> {message} </p>
+      <div className="flex flex-col justify-center items-center p-6 w-full">
+        <TaskList tasks={personalTasks} deleteTask={deletePersonalTask} />
+        <TaskForm url={url} addTask={addPersonalTask} />
+        <p> {message} </p>
+      </div>
     </div>
   )
 }

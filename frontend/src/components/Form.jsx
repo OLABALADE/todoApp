@@ -1,83 +1,146 @@
 import { useState } from "react";
 
-export function TaskForm({ url, taskType, addTask }) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [status, setStatus] = useState("pending");
-  const [priority, setPriority] = useState("low");
-  const [dueDate, setDueDate] = useState("");
+export function TaskForm({ url, addTask }) {
+  const [task, setTask] = useState({
+    title: "",
+    description: "",
+    priority: "Low",
+    status: "Pending",
+    dueDate: "",
+    taskType: "personal"
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setTask((prevTask) => ({
+      ...prevTask,
+      [name]: value,
+    }));
+  };
 
   const handleSubmit = async (e) => {
     try {
       e.preventDefault();
       const response = await fetch(url, {
         method: "POST",
-        headers: {
-          "Content-type": "application/json"
-        },
         credentials: "include",
-        body: JSON.stringify({
-          title,
-          description,
-          taskType,
-          status,
-          priority,
-          dueDate,
-        })
+        body: JSON.stringify(task)
       })
 
       const data = await response.json();
-      addTask(data);
-      setTitle("");
-      setDescription("");
+      addTask(data)
+
+      setTask({
+        title: "",
+        description: "",
+        priority: "Low",
+        status: "Pending",
+        dueDate: "",
+        taskType: "personal"
+      });
     } catch (err) {
-      console.log(err)
+      console.log(err);
     }
-  }
+  };
 
   return (
-    <div className="taskForm">
-      <h1> Add Task </h1>
-      <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          placeholder="Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-        />
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="bg-white p-8 rounded-lg shadow-lg w-full">
+        <h2 className="text-2xl font-semibold text-center mb-6">Add New Task</h2>
 
-        <textarea
-          value={description}
-          placeholder="Description"
-          onChange={(e) => setDescription(e.target.value)}
-        />
+        <form onSubmit={handleSubmit}>
 
-        <label>Choose Status:</label>
-        <select value={status} onChange={(e) => setStatus(e.target.value)}>
-          <option value={"pending"}> Pending </option>
-          <option value={"inProgress"}> In Progress </option>
-          <option value={"completed"}> Completed </option>
-        </select>
+          <div className="mb-4">
+            <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+              Title
+            </label>
+            <input
+              type="text"
+              id="title"
+              name="title"
+              value={task.title}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter task title"
+              required
+            />
+          </div>
 
-        <label>Choose Priority:</label>
-        <select value={priority} onChange={(e) => setPriority(e.target.value)}>
-          <option value={"low"}> Low </option>
-          <option value={"medium"}> Medium </option>
-          <option value={"high"}> High </option>
-        </select>
+          <div className="mb-4">
+            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+              Description
+            </label>
+            <textarea
+              id="description"
+              name="description"
+              value={task.description}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="Enter task description"
+              rows="4"
+              required
+            ></textarea>
+          </div>
 
-        <label>Set DueDate:</label>
-        <input
-          type="date"
-          value={dueDate}
-          placeholder="Due Date"
-          onChange={(e) => setDueDate(e.target.value)}
-        />
-        <button type="submit">Add Task</button>
-      </form>
+          <div className="mb-4">
+            <label htmlFor="priority" className="block text-sm font-medium text-gray-700 mb-1">
+              Priority
+            </label>
+            <select
+              id="priority"
+              name="priority"
+              value={task.priority}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="Low">Low</option>
+              <option value="Medium">Medium</option>
+              <option value="High">High</option>
+            </select>
+          </div>
+
+          <div className="mb-4">
+            <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-1">
+              Status
+            </label>
+            <select
+              id="status"
+              name="status"
+              value={task.status}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="Pending">Pending</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+
+          <div className="mb-6">
+            <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 mb-1">
+              Due Date
+            </label>
+            <input
+              type="date"
+              id="dueDate"
+              name="dueDate"
+              value={task.dueDate}
+              onChange={handleChange}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Add Task
+          </button>
+        </form>
+      </div>
     </div>
-  )
-}
+  );
+};
 
 export function TeamForm({ addTeam }) {
   const [name, setName] = useState("");
