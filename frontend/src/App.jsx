@@ -4,7 +4,8 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
-import Personal from "./pages/Personal";
+import PersonalTasks from "./pages/PersonalTasks";
+import TeamTasks from "./pages/TeamTasks";
 import Teams from "./pages/Teams";
 
 function App() {
@@ -15,8 +16,9 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/personal" element={<Personal />} />
+        <Route path="/personal" element={<PersonalTasks />} />
         <Route path="/teams" element={<Teams />} />
+        <Route path="/teams/:id/tasks" element={< TeamTasks />} />
       </Routes>
     </div>
   )

@@ -40,7 +40,6 @@ func (app *application) CreateTeam(w http.ResponseWriter, r *http.Request) {
 		log.Println("Failed to add team creator as a member:", err)
 		http.Error(w, "Error occured while creating team", http.StatusInternalServerError)
 		return
-
 	}
 
 	team, err := app.teams.GetTeam(teamId)

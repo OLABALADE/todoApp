@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { TaskList } from "../components/Task";
-import { TaskForm } from "../components/Form";
+import { PersonalTaskForm } from "../components/Form";
 import Sidebar from "../components/Sidebar";
 
-export default function Personal() {
+export default function PersonalTasks() {
   const [personalTasks, setPersonalTasks] = useState([]);
   const [message, setMessage] = useState("");
-  const url = "http://localhost:3000/api/tasks"
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -38,7 +37,7 @@ export default function Personal() {
       <Sidebar />
       <div className="flex flex-col justify-center items-center p-6 w-full">
         <TaskList tasks={personalTasks} deleteTask={deletePersonalTask} />
-        <TaskForm url={url} addTask={addPersonalTask} />
+        <PersonalTaskForm addTask={addPersonalTask} />
         <p> {message} </p>
       </div>
     </div>

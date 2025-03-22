@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Task, { TaskList } from '../components/Task';
-import { TaskForm } from '../components/Form';
-import Sidebar from '../components/NavBar';
+import Sidebar from '../components/Sidebar';
 
 export default function Dashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false)

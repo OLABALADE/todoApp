@@ -66,7 +66,7 @@ func (m *TeamModel) Delete(id int) error {
 }
 
 func (m *TeamModel) GetTeams(userId int) ([]*Team, error) {
-	stmt := `select t.id, t.name from teams t
+	stmt := `select t.id, t.name t.description from teams t
   join team_members tm on t.id = tm.team_id where tm.user_id = $1`
 
 	rows, err := m.DB.Query(context.Background(), stmt, userId)
@@ -77,7 +77,7 @@ func (m *TeamModel) GetTeams(userId int) ([]*Team, error) {
 	teams := []*Team{}
 	for rows.Next() {
 		t := &Team{}
-		err = rows.Scan(&t.Id, &t.Name)
+		err = rows.Scan(&t.Id, &t.Name, &t.Description)
 		if err != nil {
 			return nil, err
 		}
