@@ -1,2 +1,2 @@
 # todoApp
-A Todo App using React and Golang.
+A collaborative Todo App using React and Golang.
