@@ -1,24 +1,23 @@
 import React, { useState } from "react";
-import { Task } from "../models/Task.interface";
-import { Team } from "../models/Team.interface";
+import { Task } from "../../models/Task.interface";
 
-
-
-interface PTFProps {
+interface TTFProps {
+  teamId: number,
   addTask: (task: Task) => void,
 }
-const PersonalTaskForm: React.FC<PTFProps> = ({ addTask }) => {
-  const url = "http://localhost:3000/api/tasks"
+
+const TeamTaskForm: React.FC<TTFProps> = ({ teamId, addTask }) => {
   const [task, setTask] = useState({
     title: "",
     description: "",
     priority: "Low",
     status: "Pending",
     dueDate: "",
-    taskType: "personal"
+    taskType: "team",
+    teamId: `${teamId}`
   });
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setTask((prevTask) => ({
       ...prevTask,
@@ -26,10 +25,10 @@ const PersonalTaskForm: React.FC<PTFProps> = ({ addTask }) => {
     }));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     try {
       e.preventDefault();
-      const response = await fetch(url, {
+      const response = await fetch(`http://localhost:3000/api/teams/${teamId}/tasks`, {
         method: "POST",
         credentials: "include",
         body: JSON.stringify(task)
@@ -44,7 +43,8 @@ const PersonalTaskForm: React.FC<PTFProps> = ({ addTask }) => {
         priority: "Low",
         status: "Pending",
         dueDate: "",
-        taskType: "personal"
+        taskType: "team",
+        teamId: `${teamId}`
       });
     } catch (err) {
       console.log(err);
@@ -148,74 +148,6 @@ const PersonalTaskForm: React.FC<PTFProps> = ({ addTask }) => {
       </div>
     </div>
   );
-};
-
-interface TFProps {
-  addTeam: (team: Team) => void,
-}
-const TeamForm: React.FC<TFProps> = ({ addTeam }) => {
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    try {
-      e.preventDefault();
-      const response = await fetch("http://localhost:3000/api/teams", {
-        method: "POST",
-        headers: { "Content-type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          name,
-          description,
-        })
-      })
-      const data = await response.json();
-      addTeam(data);
-      setName("");
-      setDescription("");
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
-  return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full">
-        <h2 className="text-2xl font-semibold text-center mb-6"> Create Team </h2>
-        <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
-              Name
-            </label>
-            <input
-              type="text"
-              name="name"
-              placeholder="Enter Team Name"
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-            />
-          </div>
-          <div className="mb-6">
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-              Description
-            </label>
-            <textarea
-              value={description}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="Description"
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          >
-            Create Team
-          </button>
-        </form>
-      </div>
-    </div>
-  )
 }
 
-export { PersonalTaskForm, TeamForm }
+export default TeamTaskForm;

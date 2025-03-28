@@ -1,21 +1,11 @@
 import { useEffect, useState } from "react";
-import { TeamForm } from "../components/Form";
 import { Link } from "react-router";
 import Sidebar from "../components/Sidebar";
-import { Team } from "../models/Team.interface";
+import { ITeam } from "../models/Team.interface";
 
 const Teams: React.FC = () => {
-  const [teams, setTeams] = useState<Team[]>([]);
+  const [teams, setTeams] = useState<ITeam[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const addTeam = (newTeam: Team) => {
-    setTeams((prev) => [...prev, newTeam]);
-  }
-
-  /* const deleteTeam = (id: number) => {
-    const newTeams = teams.filter((team) => team.teamId !== id);
-    setTeams(newTeams);
-  } */
 
   useEffect(() => {
     const getTeams = async () => {
@@ -42,8 +32,8 @@ const Teams: React.FC = () => {
       <Sidebar />
       <div className="flex flex-col justify-center items-center p-6 w-full">
 
-        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-2xl mb-4">
-          <h2 className="text-2xl font-semibold text-center mb-6"> My Teams </h2>
+        <div className="p-8 bg-gray-800 rounded-lg shadow-lg w-full max-w-2xl mb-4">
+          <h2 className="text-2xl text-white font-semibold text-center mb-6"> Teams </h2>
           {teams.length === 0 ?
             <p className="text-gray-600 text-center"> Your have no Team </p>
             :
@@ -53,7 +43,6 @@ const Teams: React.FC = () => {
                   <Link className="" to={`/teams/${team.teamId}/tasks`}>
                     <div>
                       <h3 className="text-lg font-medium text-gray-800">{team.name}</h3>
-                      <p className="text-sm text-gray-600">{team.description}</p>
                     </div>
                   </Link>
                 </li>
@@ -61,7 +50,6 @@ const Teams: React.FC = () => {
             </ul>
           }
         </div>
-        <TeamForm addTeam={addTeam} />
       </div>
     </div>
   )

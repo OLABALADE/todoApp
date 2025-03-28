@@ -11,6 +11,7 @@ type Team struct {
 	Id          int       `json:"teamId"`
 	Name        string    `json:"name"`
 	Description string    `json:"description"`
+	Members     []*Member `json:"members"`
 	Creator     string    `json:"creator"`
 	Created     time.Time `json:"created"`
 }
@@ -34,12 +35,12 @@ func (m *TeamModel) Insert(name, desc string, creatorId int) (int, error) {
 		return 0, err
 	}
 
-	rows, err := pgx.CollectRows(results, pgx.RowTo[int])
+	rowIds, err := pgx.CollectRows(results, pgx.RowTo[int])
 	if err != nil {
 		return 0, err
 	}
 
-	return rows[0], nil
+	return rowIds[0], nil
 }
 
 func (m *TeamModel) GetTeam(id int) (*Team, error) {
@@ -100,7 +101,7 @@ func (m *TeamModel) GetMembers(teamId int) ([]*Member, error) {
 	members := []*Member{}
 	for rows.Next() {
 		tm := &Member{}
-		err = rows.Scan(&tm.Id, &tm.Name, tm.Role)
+		err = rows.Scan(&tm.Id, &tm.Name, &tm.Role)
 		if err != nil {
 			return nil, err
 		}
@@ -109,10 +110,10 @@ func (m *TeamModel) GetMembers(teamId int) ([]*Member, error) {
 	return members, nil
 }
 
-func (m *TeamModel) AddMember(team_id, userId int) error {
+func (m *TeamModel) AddMember(team_id, userId int, role string) error {
 	stmt := `insert into team_members (user_id, team_id, role, joined_at)
   values($1, $2, $3, current_timestamp)`
-	_, err := m.DB.Exec(context.Background(), stmt, userId, team_id, "member")
+	_, err := m.DB.Exec(context.Background(), stmt, userId, team_id, role)
 	if err != nil {
 		return err
 	}

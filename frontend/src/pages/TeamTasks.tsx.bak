@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { TeamTaskForm } from "../components/Form";
-import { TaskList } from "../components/Task";
+import TaskList from "../components/Task";
 import { Task } from "../models/Task.interface";
 import Sidebar from "../components/Sidebar";
 
 const TeamTasks: React.FC = () => {
-  const { id } = useParams();
+  let { id } = useParams();
+  const teamId = Number(id);
   const [teamTasks, setTeamTasks] = useState<Task[]>([]);
 
   const addTeamTask = (newTask: Task) => {
@@ -38,7 +39,7 @@ const TeamTasks: React.FC = () => {
       <Sidebar />
       <div className="flex flex-col justify-center items-center p-6 w-full">
         <TaskList tasks={teamTasks} deleteTask={deleteTeamTask} />
-        <TeamTaskForm teamId={id} addTask={addTeamTask} />
+        <TeamTaskForm teamId={teamId} addTask={addTeamTask} />
       </div>
     </div>
   )

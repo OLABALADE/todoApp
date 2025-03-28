@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router';
 import Sidebar from '../components/Sidebar';
+import TeamList from '../components/team/TeamList';
 
 const Dashboard: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
-  const username = localStorage.getItem("username");
   const checkAuthentication = async (): Promise<boolean> => {
     try {
       const response = await fetch("http://localhost:3000/api/auth/verify-token", {
@@ -33,9 +33,9 @@ const Dashboard: React.FC = () => {
     return <p> You are not logged in.Click here to <Link to="/login">Login</Link></p>
   } else {
     return (
-      <div className="Dashboard">
+      <div className="flex min-h-screen">
         <Sidebar />
-        <h1>Hello {username}</h1>
+        <TeamList />
       </div>
     );
   }

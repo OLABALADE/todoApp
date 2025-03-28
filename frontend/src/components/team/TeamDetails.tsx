@@ -1,35 +1,25 @@
-import { useEffect, useState } from "react"
-import { Team } from "../../models/Team.interface";
+import { ITeam } from "../../models/Team.interface";
+import AddUserToTeam from "./AddUserToTeam";
 
-const TeamDetail: React.FC<{ teamId: number }> = ({ teamId }) => {
-  const url = `http://localhost:3000/api/team/${teamId}`
-  const [team, setTeam] = useState<Team>();
-  const [loading, setLoading] = useState<boolean>(true);
+interface TeamDetailProps {
+  team: ITeam | undefined
+  setTeam: React.Dispatch<React.SetStateAction<ITeam>>
+}
 
-  useEffect(() => {
-    const fetchTeam = async () => {
-      try {
-        const response = await fetch(url, {
-          credentials: "include",
-        })
-        const data: Team = await response.json();
-        setTeam(data);
-        setLoading(false);
-      } catch (err) {
-        console.log(err);
-      }
-    }
-    fetchTeam();
-  }, [])
-
-  if (loading) {
-    return <p> Loading... </p>
-  }
-
+const TeamDetail: React.FC<TeamDetailProps> = ({ team, setTeam }) => {
   return (
-    <div className="rounded-lg bg-gray-200 shadow-lg">
-      <h2 className="">{team?.name}</h2>
-      <p> {team?.description} </p>
+    <div className="flex flex-col items-center w-full">
+      <div className="w-full mb-4">
+        <h2 className="text-2xl text-gray-800 mt-1 font-semibold text-center mb-2">{team?.name}</h2>
+        <p className="text-gray-800 text-center font-semibold text-sm mb-6"> Description: {team?.description} </p>
+        <h2 className="text-xl font-semibold text-gray-600 text-center"> Members </h2>
+        <ul>
+          {team?.members.map((member, index) => (
+            <li className="text-gray-600 text-center" key={index}>{member.name}</li>
+          ))}
+        </ul>
+      </div>
+      <AddUserToTeam team={team} setTeam={setTeam} />
     </div>
   )
 }

@@ -10,7 +10,7 @@ import (
 )
 
 type MemberRequest struct {
-	UserId int `json:"user_id"`
+	UserId int `json:"userId"`
 }
 
 type TeamRequest struct {
@@ -35,7 +35,7 @@ func (app *application) CreateTeam(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = app.teams.AddMember(teamId, userId)
+	err = app.teams.AddMember(teamId, userId, "admin")
 	if err != nil {
 		log.Println("Failed to add team creator as a member:", err)
 		http.Error(w, "Error occured while creating team", http.StatusInternalServerError)
@@ -59,7 +59,7 @@ func (app *application) CreateTeam(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) GetTeam(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id, _ := vars["teamID"]
+	id, _ := vars["teamId"]
 
 	teamId, err := strconv.Atoi(id)
 	if err != nil {
@@ -71,6 +71,13 @@ func (app *application) GetTeam(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Failed to get team:", err)
 		http.Error(w, "Failed to get team", http.StatusInternalServerError)
+		return
+	}
+
+	team.Members, err = app.teams.GetMembers(teamId)
+	if err != nil {
+		log.Println("Failed to get team members:", err)
+		http.Error(w, "Failed to get team members", http.StatusInternalServerError)
 		return
 	}
 
@@ -131,14 +138,14 @@ func (app *application) AddMemberToTeam(w http.ResponseWriter, r *http.Request) 
 	id, _ := vars["teamID"]
 	teamId, err := strconv.Atoi(id)
 	if err != nil {
-		log.Println(err)
+		log.Println("Bad URL:", err)
 		http.Error(w, "Invalid request, id parameter is not a number", http.StatusBadRequest)
 		return
 	}
 
-	err = app.teams.AddMember(teamId, mr.UserId)
+	err = app.teams.AddMember(teamId, mr.UserId, "member")
 	if err != nil {
-		log.Println(err)
+		log.Println("Failed to add member to group:", err)
 		http.Error(w, "Failed to add member to group", http.StatusInternalServerError)
 		return
 	}
@@ -156,7 +163,7 @@ func (app *application) GetTeamMembers(w http.ResponseWriter, r *http.Request) {
 
 	members, err := app.teams.GetMembers(teamId)
 	if err != nil {
-		log.Println("Failed to get team members")
+		log.Println("Failed to get team members:", err)
 		http.Error(w, "Error while getting team members", http.StatusInternalServerError)
 		return
 	}

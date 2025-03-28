@@ -1,46 +1,45 @@
-import { useEffect, useState } from "react";
-import { useParams } from "react-router";
-import { TeamTaskForm } from "../components/Form";
-import TaskList from "../components/Task";
-import { Task } from "../models/Task.interface";
+import React, { useEffect, useState } from "react";
+import { ITask } from "../models/Task.interface";
+import TeamTaskList from "../components/task/TeamTaskList";
 import Sidebar from "../components/Sidebar";
+import { useParams } from "react-router";
+import AssignTask from "../components/team/AssignTask";
 
 const TeamTasks: React.FC = () => {
-  let { id } = useParams();
-  const teamId = Number(id);
-  const [teamTasks, setTeamTasks] = useState<Task[]>([]);
+  const { id } = useParams();
+  const [tasks, setTasks] = useState<ITask[]>();
+  const [loading, setLoading] = useState(true);
 
-  const addTeamTask = (newTask: Task) => {
-    setTeamTasks((prev) => [...prev, newTask])
+  const addTask = (task: ITask) => {
+    setTasks(prev => (
+      [...prev, task]
+    ))
   }
-
-  const deleteTeamTask = (id: number) => {
-    const newTasks = teamTasks.filter(task => task.id !== id);
-    setTeamTasks(newTasks);
-  }
-
   useEffect(() => {
-    const getTasks = async () => {
+    const fetchTasks = async () => {
       try {
         const response = await fetch(`http://localhost:3000/api/teams/${id}/tasks`, {
           credentials: "include",
         })
-        const data: Task[] = await response.json();
-        setTeamTasks(data);
+        const data: ITask[] = await response.json();
+        setTasks(data);
+        setLoading(false);
       } catch (err) {
         console.log(err);
       }
     }
-    getTasks();
-  })
+    fetchTasks();
+  }, [])
+
+  if (loading) {
+    return <p> Loading... </p>
+  }
 
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <div className="flex flex-col justify-center items-center p-6 w-full">
-        <TaskList tasks={teamTasks} deleteTask={deleteTeamTask} />
-        <TeamTaskForm teamId={teamId} addTask={addTeamTask} />
-      </div>
+      <TeamTaskList tasks={tasks} />
+      <AssignTask teamId={Number(id)} addTask={addTask} />
     </div>
   )
 }

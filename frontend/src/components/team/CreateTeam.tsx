@@ -1,13 +1,11 @@
-import { Team } from "../../models/Team.interface";
+import { useNavigate } from "react-router";
+import { ITeam } from "../../models/Team.interface";
 import { useState } from "react";
 
-interface TFProps {
-  addTeam: (team: Team) => void,
-}
-
-const CreateTeam: React.FC<TFProps> = ({ addTeam }) => {
+const CreateTeam: React.FC = () => {
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const navigate = useNavigate();
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     try {
       e.preventDefault();
@@ -20,8 +18,8 @@ const CreateTeam: React.FC<TFProps> = ({ addTeam }) => {
           description,
         })
       })
-      const data = await response.json();
-      addTeam(data);
+      const data: ITeam = await response.json();
+      navigate(`/teams/${data.teamId}`)
       setName("");
       setDescription("");
     } catch (err) {
@@ -30,8 +28,8 @@ const CreateTeam: React.FC<TFProps> = ({ addTeam }) => {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full">
+    <div className="flex items-center justify-center min-h-screen bg-gray-100 w-full">
+      <div className="bg-white p-8 rounded-lg shadow-lg min-w-8 mx-4">
         <h2 className="text-2xl font-semibold text-center mb-6"> Create Team </h2>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">

@@ -63,8 +63,7 @@ const TaskList: React.FC<TaskListProps> = ({ tasks, deleteTask }) => {
       <h2 className="text-2xl font-semibold text-center mb-6">Task List</h2>
       {tasks.length === 0 ?
         <p className="text-gray-600 text-center">No tasks added yet.</p>
-        :
-        <ul className="space-y-4">
+        : <ul className="space-y-4">
           {tasks.map((task, index) =>
             <li key={index} className="bg-gray-50 p-4 rounded-lg shadow-sm flex justify-between items-center">
               <TaskElement key={index}

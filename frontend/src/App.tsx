@@ -6,6 +6,8 @@ import Dashboard from "./pages/Dashboard";
 import PersonalTasks from "./pages/PersonalTasks";
 import TeamTasks from "./pages/TeamTasks";
 import Teams from "./pages/Teams";
+import Team from "./pages/Team";
+import TeamCreate from "./pages/TeamCreate";
 
 function App() {
   return (
@@ -15,9 +17,11 @@ function App() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/personal" element={<PersonalTasks />} />
-        <Route path="/teams" element={<Teams />} />
+        <Route path="/personal/tasks" element={<PersonalTasks />} />
+        <Route path="/teams/tasks" element={<Teams />} />
         <Route path="/teams/:id/tasks" element={< TeamTasks />} />
+        <Route path="/teams/:id" element={< Team />} />
+        <Route path="/teams/create" element={< TeamCreate />} />
       </Routes>
     </div>
   )

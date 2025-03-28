@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import TaskList from "../components/Task";
 import { PersonalTaskForm } from "../components/Form";
 import Sidebar from "../components/Sidebar";
+import { ITask } from "../models/Task.interface";
 
 const PersonalTasks: React.FC = () => {
-  const [personalTasks, setPersonalTasks] = useState([]);
+  const [personalTasks, setPersonalTasks] = useState<ITask[]>();
   const [message, setMessage] = useState("");
 
   useEffect(() => {
@@ -23,12 +24,12 @@ const PersonalTasks: React.FC = () => {
     fetchTasks();
   }, [])
 
-  const addPersonalTask = (newTask) => {
-    setPersonalTasks((prev) => [...prev, newTask])
+  const addPersonalTask = (newTask: ITask) => {
+    setPersonalTasks(prev => ([...prev, newTask]))
   }
 
   const deletePersonalTask = (id: number) => {
-    const newTasks = personalTasks.filter(task => task.id !== id);
+    const newTasks = personalTasks?.filter(task => task.id !== id);
     setPersonalTasks(newTasks);
   }
 
