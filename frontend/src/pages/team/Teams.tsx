@@ -1,11 +1,13 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { Link } from "react-router";
-import Sidebar from "../components/Sidebar";
-import { ITeam } from "../models/Team.interface";
+import Sidebar from "../../components/Sidebar";
+import { ITeam } from "../../models/Team.interface";
+import { AuthContext } from "../../components/Auth";
 
 const Teams: React.FC = () => {
   const [teams, setTeams] = useState<ITeam[]>([]);
   const [loading, setLoading] = useState(true);
+  const auth = useContext(AuthContext);
 
   useEffect(() => {
     const getTeams = async () => {
@@ -18,6 +20,7 @@ const Teams: React.FC = () => {
         setLoading(false);
       } catch (err) {
         console.log(err);
+        auth?.onFailure();
       }
     }
     getTeams();

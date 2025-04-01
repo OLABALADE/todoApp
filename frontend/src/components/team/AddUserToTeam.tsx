@@ -4,27 +4,24 @@ import { ITeam } from "../../models/Team.interface";
 
 interface AddUsersToTeamProps {
   team: ITeam | undefined,
-  setTeam: React.Dispatch<React.SetStateAction<ITeam>>
+  setTeam: React.Dispatch<React.SetStateAction<ITeam | undefined>>
 }
-
 
 const AddUserToTeam: React.FC<AddUsersToTeamProps> = ({ team, setTeam }) => {
   const [users, setUsers] = useState<User[]>([]);
-  const [selectedUser, setSelectedUser] = useState<User>({
-    userId: 0,
-  });
+  const [selectedUser, setSelectedUser] = useState<User | undefined>();
 
   const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     e.preventDefault();
-    const { value } = e.target
-    setSelectedUser(prevUser => ({
-      ...prevUser,
-      userId: Number(value)
-    }))
+    const userId = Number(e.target.value);
+    const user = users.find((user) => user.userId === userId)
+    setSelectedUser(user);
   }
 
   const handleAddUsers = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!selectedUser) return;
+
     try {
       const response = await fetch(`http://localhost:3000/api/teams/${team?.teamId}/members`, {
         method: "POST",
@@ -33,14 +30,16 @@ const AddUserToTeam: React.FC<AddUsersToTeamProps> = ({ team, setTeam }) => {
       })
 
       if (response.ok) {
-        setTeam(prevTeam => ({
-          ...prevTeam,
-          members: [...prevTeam.members, selectedUser],
-        }));
+        const remainingUsers = users.filter((user) => ![...(team?.members ?? []), selectedUser]
+          .some((member) => member.userId === user.userId))
 
-        setSelectedUser({
-          userId: 0
-        })
+        setTeam((prev) => (
+          {
+            ...prev,
+            members: [...prev?.members ?? [], selectedUser]
+          }
+        ))
+        setSelectedUser(remainingUsers.length > 0 ? remainingUsers[0] : undefined)
       }
 
     } catch (err) {
@@ -56,6 +55,9 @@ const AddUserToTeam: React.FC<AddUsersToTeamProps> = ({ team, setTeam }) => {
         })
         const data: User[] = await response.json();
         setUsers(data);
+        if (data.length > 0) {
+          setSelectedUser(data[0]);
+        }
       } catch (err) {
         console.log(err);
       }
@@ -74,15 +76,16 @@ const AddUserToTeam: React.FC<AddUsersToTeamProps> = ({ team, setTeam }) => {
           </label>
           <select
             id="users"
-            value={selectedUser.userId}
+            value={selectedUser?.userId}
             onChange={handleChange}
             className="border border-gray-300 rounded p-2 w-full"
           >
-            {users.map((user, index) => (
-              <option key={index} value={user.userId}>
-                {user.name}
-              </option>
-            ))}
+            {users.filter(user => !team?.members?.some(member => member.userId === user.userId))
+              .map((user, index) => (
+                <option key={index} value={user.userId}>
+                  {user.name}
+                </option>
+              ))}
           </select>
         </div>
 

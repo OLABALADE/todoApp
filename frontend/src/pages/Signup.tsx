@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 
 const Signup: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -52,7 +52,7 @@ const Signup: React.FC = () => {
             <input
               type="text"
               value={username}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="bg-white w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               onChange={(e) => setUsername(e.target.value)}
             />
           </div>
@@ -62,7 +62,7 @@ const Signup: React.FC = () => {
             <input
               type="email"
               value={email}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="bg-white w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
@@ -72,7 +72,7 @@ const Signup: React.FC = () => {
             <input
               type="password"
               value={password}
-              className="w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="bg-white w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>

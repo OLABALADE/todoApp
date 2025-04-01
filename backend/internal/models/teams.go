@@ -43,29 +43,6 @@ func (m *TeamModel) Insert(name, desc string, creatorId int) (int, error) {
 	return rowIds[0], nil
 }
 
-func (m *TeamModel) GetTeam(id int) (*Team, error) {
-	stmt := `select t.id, t.name, t.description, u.name, t.created_at from teams t
-  join users u on u.id = creator_id where t.id = $1`
-	row := m.DB.QueryRow(context.Background(), stmt, id)
-
-	t := &Team{}
-	err := row.Scan(&t.Id, &t.Name, &t.Description, &t.Creator, &t.Created)
-	if err != nil {
-		return nil, err
-	}
-	return t, nil
-}
-
-func (m *TeamModel) Delete(id int) error {
-	stmt := `delete from teams where id = $1`
-	_, err := m.DB.Exec(context.Background(), stmt, id)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (m *TeamModel) GetTeams(userId int) ([]*Team, error) {
 	stmt := `select t.id, t.name, t.description from teams t
   join team_members tm on t.id = tm.team_id where tm.user_id = $1`
@@ -86,6 +63,47 @@ func (m *TeamModel) GetTeams(userId int) ([]*Team, error) {
 	}
 
 	return teams, nil
+}
+
+func (m *TeamModel) GetTeam(id int) (*Team, error) {
+	stmt := `select t.id, t.name, t.description, u.name, t.created_at from teams t
+  join users u on u.id = creator_id where t.id = $1`
+	row := m.DB.QueryRow(context.Background(), stmt, id)
+
+	t := &Team{}
+	err := row.Scan(&t.Id, &t.Name, &t.Description, &t.Creator, &t.Created)
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
+}
+
+func (m *TeamModel) Update(id int, name, description string) (*Team, error) {
+	stmt := `update teams set name = $1,
+  description = $2 
+  where id = $3 returning id, name, description`
+
+	t := &Team{}
+	err := m.DB.QueryRow(context.Background(),
+		stmt,
+		name,
+		description,
+		id).Scan(&t.Id, &t.Name, &t.Description)
+
+	if err != nil {
+		return nil, err
+	}
+	return t, nil
+}
+
+func (m *TeamModel) Delete(id int) error {
+	stmt := `delete from teams where id = $1`
+	_, err := m.DB.Exec(context.Background(), stmt, id)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (m *TeamModel) GetMembers(teamId int) ([]*Member, error) {

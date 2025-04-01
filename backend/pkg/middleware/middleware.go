@@ -12,7 +12,7 @@ import (
 type Middleware struct{}
 type ContextKey string
 
-var idKey ContextKey = "userID"
+var idKey ContextKey = "userId"
 
 func (m Middleware) Auth(next http.HandlerFunc) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

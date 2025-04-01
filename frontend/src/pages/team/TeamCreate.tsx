@@ -1,6 +1,6 @@
 import React from "react"
-import Sidebar from "../components/Sidebar";
-import CreateTeam from "../components/team/CreateTeam";
+import Sidebar from "../../components/Sidebar";
+import CreateTeam from "../../components/team/CreateTeam";
 
 const TeamCreate: React.FC = () => {
   return (

@@ -15,9 +15,9 @@ type ProjectRequest struct {
 }
 
 func (app *application) CreateProject(w http.ResponseWriter, r *http.Request) {
-	userId, _ := r.Context().Value(middleware.ContextKey("userID")).(int)
+	userId, _ := r.Context().Value(middleware.ContextKey("userId")).(int)
 	vars := mux.Vars(r)
-	id, _ := vars["teamID"]
+	id, _ := vars["teamId"]
 	teamId, err := strconv.Atoi(id)
 	if err != nil {
 		log.Println(err)
@@ -50,8 +50,8 @@ func (app *application) CreateProject(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) GetProject(w http.ResponseWriter, r *http.Request) {
-	tId, _ := mux.Vars(r)["teamID"]
-	pId, _ := mux.Vars(r)["projectID"]
+	tId, _ := mux.Vars(r)["teamId"]
+	pId, _ := mux.Vars(r)["projectId"]
 
 	teamId, err1 := strconv.Atoi(tId)
 	projectId, err2 := strconv.Atoi(pId)
@@ -71,7 +71,7 @@ func (app *application) GetProject(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) GetProjects(w http.ResponseWriter, r *http.Request) {
-	tId, _ := mux.Vars(r)["teamID"]
+	tId, _ := mux.Vars(r)["teamId"]
 
 	teamId, err := strconv.Atoi(tId)
 	if err != nil {
@@ -91,8 +91,8 @@ func (app *application) GetProjects(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) UpdateProject(w http.ResponseWriter, r *http.Request) {}
 func (app *application) DeleteProject(w http.ResponseWriter, r *http.Request) {
-	tId, _ := mux.Vars(r)["teamID"]
-	pId, _ := mux.Vars(r)["projectID"]
+	tId, _ := mux.Vars(r)["teamId"]
+	pId, _ := mux.Vars(r)["projectId"]
 
 	teamId, err1 := strconv.Atoi(tId)
 	projectId, err2 := strconv.Atoi(pId)

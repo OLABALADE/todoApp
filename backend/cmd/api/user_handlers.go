@@ -100,7 +100,7 @@ func (app *application) Login(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) GetUser(w http.ResponseWriter, r *http.Request) {
-	userId, _ := r.Context().Value(middleware.ContextKey("userID")).(int)
+	userId, _ := r.Context().Value(middleware.ContextKey("userId")).(int)
 
 	user, err := app.users.GetUser(userId)
 	if err != nil {
@@ -125,7 +125,7 @@ func (app *application) GetUsers(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id, _ := vars["userID"]
+	id, _ := vars["userId"]
 
 	userId, err := strconv.Atoi(id)
 	if err != nil {

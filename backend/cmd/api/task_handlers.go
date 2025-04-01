@@ -23,7 +23,7 @@ type TaskRequest struct {
 }
 
 func (app *application) CreatePersonalTask(w http.ResponseWriter, r *http.Request) {
-	userId, _ := r.Context().Value(middleware.ContextKey("userID")).(int)
+	userId, _ := r.Context().Value(middleware.ContextKey("userId")).(int)
 
 	tr := &TaskRequest{}
 	err := json.NewDecoder(r.Body).Decode(tr)
@@ -72,7 +72,7 @@ func (app *application) CreatePersonalTask(w http.ResponseWriter, r *http.Reques
 }
 
 func (app *application) GetPersonalTasks(w http.ResponseWriter, r *http.Request) {
-	userId, _ := r.Context().Value(middleware.ContextKey("userID")).(int)
+	userId, _ := r.Context().Value(middleware.ContextKey("userId")).(int)
 
 	personalTasks, err := app.tasks.GetPersonalTasks(userId)
 	if err != nil {
@@ -91,7 +91,7 @@ func (app *application) GetPersonalTasks(w http.ResponseWriter, r *http.Request)
 
 func (app *application) GetPersonalTask(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id, _ := vars["taskID"]
+	id, _ := vars["taskId"]
 
 	taskId, err := strconv.Atoi(id)
 	if err != nil {
@@ -119,7 +119,7 @@ func (app *application) UpdatePersonalTask(w http.ResponseWriter, r *http.Reques
 
 func (app *application) DeletePersonalTask(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id, _ := vars["taskID"]
+	id, _ := vars["taskId"]
 
 	taskId, err := strconv.Atoi(id)
 	if err != nil {
@@ -138,8 +138,8 @@ func (app *application) DeletePersonalTask(w http.ResponseWriter, r *http.Reques
 
 // ////////////////////// Team Tasks /////////////////////////
 func (app *application) CreateTeamTask(w http.ResponseWriter, r *http.Request) {
-	userId, _ := r.Context().Value(middleware.ContextKey("userID")).(int)
-	tId, _ := mux.Vars(r)["teamID"]
+	userId, _ := r.Context().Value(middleware.ContextKey("userId")).(int)
+	tId, _ := mux.Vars(r)["teamId"]
 	teamId, err := strconv.Atoi(tId)
 	if err != nil {
 		http.Error(w, "Invalid URL", http.StatusBadRequest)
@@ -188,7 +188,7 @@ func (app *application) CreateTeamTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) GetTeamTasks(w http.ResponseWriter, r *http.Request) {
-	tId, _ := mux.Vars(r)["teamID"]
+	tId, _ := mux.Vars(r)["teamId"]
 	teamId, err := strconv.Atoi(tId)
 	if err != nil {
 		http.Error(w, "Invalid URL", http.StatusBadRequest)
@@ -205,8 +205,8 @@ func (app *application) GetTeamTasks(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(tasks)
 }
 func (app *application) GetTeamTask(w http.ResponseWriter, r *http.Request) {
-	tmId, _ := mux.Vars(r)["teamID"]
-	tkId, _ := mux.Vars(r)["taskID"]
+	tmId, _ := mux.Vars(r)["teamId"]
+	tkId, _ := mux.Vars(r)["taskId"]
 
 	teamId, err1 := strconv.Atoi(tmId)
 	taskId, err2 := strconv.Atoi(tkId)
@@ -229,8 +229,8 @@ func (app *application) GetTeamTask(w http.ResponseWriter, r *http.Request) {
 func (app *application) UpdateTeamTask(w http.ResponseWriter, r *http.Request) {}
 
 func (app *application) DeleteTeamTask(w http.ResponseWriter, r *http.Request) {
-	tmId, _ := mux.Vars(r)["teamID"]
-	tkId, _ := mux.Vars(r)["taskID"]
+	tmId, _ := mux.Vars(r)["teamId"]
+	tkId, _ := mux.Vars(r)["taskId"]
 
 	teamId, err1 := strconv.Atoi(tmId)
 	taskId, err2 := strconv.Atoi(tkId)
@@ -250,9 +250,9 @@ func (app *application) DeleteTeamTask(w http.ResponseWriter, r *http.Request) {
 
 // //////////////////// Project Tasks //////////////////////////
 func (app *application) CreateProjectTask(w http.ResponseWriter, r *http.Request) {
-	userId, _ := r.Context().Value(middleware.ContextKey("userID")).(int)
-	tId, _ := mux.Vars(r)["teamID"]
-	pId, _ := mux.Vars(r)["projectID"]
+	userId, _ := r.Context().Value(middleware.ContextKey("userId")).(int)
+	tId, _ := mux.Vars(r)["teamId"]
+	pId, _ := mux.Vars(r)["projectId"]
 
 	teamId, err1 := strconv.Atoi(tId)
 	projectId, err2 := strconv.Atoi(pId)
@@ -298,9 +298,9 @@ func (app *application) CreateProjectTask(w http.ResponseWriter, r *http.Request
 }
 
 func (app *application) GetProjectTask(w http.ResponseWriter, r *http.Request) {
-	tmId, _ := mux.Vars(r)["teamID"]
-	pId, _ := mux.Vars(r)["projectID"]
-	tkId, _ := mux.Vars(r)["taskID"]
+	tmId, _ := mux.Vars(r)["teamId"]
+	pId, _ := mux.Vars(r)["projectId"]
+	tkId, _ := mux.Vars(r)["taskId"]
 
 	teamId, err1 := strconv.Atoi(tmId)
 	projectId, err2 := strconv.Atoi(pId)
@@ -322,8 +322,8 @@ func (app *application) GetProjectTask(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) GetProjectTasks(w http.ResponseWriter, r *http.Request) {
-	tId, _ := mux.Vars(r)["teamID"]
-	pId, _ := mux.Vars(r)["projectID"]
+	tId, _ := mux.Vars(r)["teamId"]
+	pId, _ := mux.Vars(r)["projectId"]
 
 	teamId, err1 := strconv.Atoi(tId)
 	projectId, err2 := strconv.Atoi(pId)
@@ -343,9 +343,9 @@ func (app *application) GetProjectTasks(w http.ResponseWriter, r *http.Request) 
 }
 
 func (app *application) DeleteProjectTask(w http.ResponseWriter, r *http.Request) {
-	tmId, _ := mux.Vars(r)["teamID"]
-	pId, _ := mux.Vars(r)["projectID"]
-	tkId, _ := mux.Vars(r)["taskID"]
+	tmId, _ := mux.Vars(r)["teamId"]
+	pId, _ := mux.Vars(r)["projectId"]
+	tkId, _ := mux.Vars(r)["taskId"]
 
 	teamId, err1 := strconv.Atoi(tmId)
 	projectId, err2 := strconv.Atoi(pId)

@@ -20,7 +20,7 @@ type TeamRequest struct {
 }
 
 func (app *application) CreateTeam(w http.ResponseWriter, r *http.Request) {
-	userId := r.Context().Value(middleware.ContextKey("userID")).(int)
+	userId := r.Context().Value(middleware.ContextKey("userId")).(int)
 	tr := &TeamRequest{}
 	err := json.NewDecoder(r.Body).Decode(tr)
 	if err != nil {
@@ -85,7 +85,7 @@ func (app *application) GetTeam(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) GetUserTeams(w http.ResponseWriter, r *http.Request) {
-	userId, _ := r.Context().Value(middleware.ContextKey("userID")).(int)
+	userId, _ := r.Context().Value(middleware.ContextKey("userId")).(int)
 
 	teams, err := app.teams.GetTeams(userId)
 	if err != nil {
@@ -103,11 +103,36 @@ func (app *application) GetUserTeams(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) UpdateTeam(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, _ := vars["teamId"]
+	teamId, err := strconv.Atoi(id)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, "Id parameter should be a number", http.StatusBadRequest)
+		return
+	}
+
+	tr := &TeamRequest{}
+	err = json.NewDecoder(r.Body).Decode(tr)
+	if err != nil {
+		log.Println("Failed to decode json:", err)
+		http.Error(w, "Bad Request body", http.StatusBadRequest)
+		return
+	}
+
+	uTeam, err := app.teams.Update(teamId, tr.Name, tr.Description)
+	if err != nil {
+		log.Println("Failed to update team:", err)
+		http.Error(w, "Failed to update team", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(uTeam)
 }
 
 func (app *application) DeleteTeam(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id, _ := vars["teamID"]
+	id, _ := vars["teamId"]
 	teamId, err := strconv.Atoi(id)
 	if err != nil {
 		log.Println(err)
@@ -135,7 +160,7 @@ func (app *application) AddMemberToTeam(w http.ResponseWriter, r *http.Request) 
 	}
 
 	vars := mux.Vars(r)
-	id, _ := vars["teamID"]
+	id, _ := vars["teamId"]
 	teamId, err := strconv.Atoi(id)
 	if err != nil {
 		log.Println("Bad URL:", err)
@@ -154,7 +179,7 @@ func (app *application) AddMemberToTeam(w http.ResponseWriter, r *http.Request) 
 
 func (app *application) GetTeamMembers(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id, _ := vars["teamID"]
+	id, _ := vars["teamId"]
 	teamId, err := strconv.Atoi(id)
 	if err != nil {
 		http.Error(w, "Invalid Request", http.StatusBadRequest)
@@ -172,25 +197,18 @@ func (app *application) GetTeamMembers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) RemoveMemberFromTeam(w http.ResponseWriter, r *http.Request) {
-	mr := &MemberRequest{}
-	err := json.NewDecoder(r.Body).Decode(mr)
-
-	if err != nil {
-		log.Println(err)
-		http.Error(w, "Invalid Request", http.StatusBadRequest)
-		return
-	}
-
 	vars := mux.Vars(r)
-	id, _ := vars["teamID"]
-	teamId, err := strconv.Atoi(id)
-	if err != nil {
-		log.Println(err)
+	tId, _ := vars["teamId"]
+	uId, _ := vars["userId"]
+	teamId, err1 := strconv.Atoi(tId)
+	userId, err2 := strconv.Atoi(uId)
+
+	if err1 != nil || err2 != nil {
 		http.Error(w, "Invalid request, id parameter is not a number", http.StatusBadRequest)
 		return
 	}
 
-	err = app.teams.RemoveMember(teamId, mr.UserId)
+	err := app.teams.RemoveMember(teamId, userId)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, "Failed to remove member to group", http.StatusInternalServerError)

@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { User } from "../../models/User.interface";
-import { Task } from "../../models/Task.interface";
+import { ITask } from "../../models/Task.interface";
 
 interface AssignTaskProps {
   teamId: number,
-  addTask: (task: Task) => void,
+  addTask: (task: ITask) => void,
 }
 
 const AssignTask: React.FC<AssignTaskProps> = ({ teamId, addTask }) => {
   const [members, setMembers] = useState<User[]>([])
-  const [task, setTask] = useState<Task>({
+  const [task, setTask] = useState<ITask>({
     title: "",
     description: "",
     status: "pending",
@@ -27,7 +27,7 @@ const AssignTask: React.FC<AssignTaskProps> = ({ teamId, addTask }) => {
         body: JSON.stringify(task)
       })
 
-      const data: Task = await response.json();
+      const data: ITask = await response.json();
       addTask(data);
     } catch (err) {
       console.log(err);
@@ -153,7 +153,7 @@ const AssignTask: React.FC<AssignTaskProps> = ({ teamId, addTask }) => {
             className="border border-gray-300 rounded p-2 w-full"
           >
             {members.map((member, index) => (
-              <option key={index} value={member.id}>
+              <option key={index} value={member.userId}>
                 {member.name}
               </option>
             ))}
