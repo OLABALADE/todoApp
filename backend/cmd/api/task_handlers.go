@@ -19,7 +19,19 @@ type TaskRequest struct {
 	Priority    string `json:"priority"`
 	DueDate     string `json:"dueDate"`
 	TeamId      int    `json:"teamId"`
+	AssigneeId  int    `json:"assigneeId"`
 	ProjectId   int    `json:"projectId"`
+}
+
+type TaskResponse struct {
+	Title       string      `json:"title"`
+	Description string      `json:"description"`
+	Type        string      `json:"taskType"`
+	Status      string      `json:"status"`
+	Priority    string      `json:"priority"`
+	DueDate     string      `json:"dueDate"`
+	TeamId      int         `json:"teamId"`
+	AssigneeId  models.User `json:"assignee"`
 }
 
 func (app *application) CreatePersonalTask(w http.ResponseWriter, r *http.Request) {
@@ -160,7 +172,10 @@ func (app *application) CreateTeamTask(w http.ResponseWriter, r *http.Request) {
 		Status:      tr.Status,
 		Priority:    tr.Priority,
 		TeamId:      teamId,
-		CreatorId:   userId,
+		Assignee: models.User{
+			Id: tr.AssigneeId,
+		},
+		CreatorId: userId,
 	}
 
 	newTask.DueDate, err = time.Parse("2006-01-02", tr.DueDate)
@@ -170,17 +185,10 @@ func (app *application) CreateTeamTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	taskId, err := app.tasks.InsertTeamTask(newTask)
+	task, err := app.tasks.InsertTeamTask(newTask)
 	if err != nil {
-		log.Println("Failed to create project task:", err)
-		http.Error(w, "Failed to create project tasks", http.StatusInternalServerError)
-		return
-	}
-
-	task, err := app.tasks.GetTeamTask(teamId, taskId)
-	if err != nil {
-		log.Println("Failed to get newly added task:", err)
-		http.Error(w, "Failed to return newly added tasks", http.StatusInternalServerError)
+		log.Println("Failed to create team task:", err)
+		http.Error(w, "Failed to create team tasks", http.StatusInternalServerError)
 		return
 	}
 
@@ -226,7 +234,50 @@ func (app *application) GetTeamTask(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(task)
 }
 
-func (app *application) UpdateTeamTask(w http.ResponseWriter, r *http.Request) {}
+func (app *application) UpdateTeamTask(w http.ResponseWriter, r *http.Request) {
+	tmId, _ := mux.Vars(r)["teamId"]
+	tkId, _ := mux.Vars(r)["taskId"]
+
+	teamId, err1 := strconv.Atoi(tmId)
+	taskId, err2 := strconv.Atoi(tkId)
+
+	if err1 != nil || err2 != nil {
+		http.Error(w, "Invalid URL", http.StatusBadRequest)
+		return
+	}
+
+	tr := &TaskRequest{}
+	err := json.NewDecoder(r.Body).Decode(tr)
+	if err != nil {
+		log.Println("Invalid json data:", err)
+		http.Error(w, "Bad request body", http.StatusBadRequest)
+		return
+	}
+
+	task := &models.Task{
+		ID:          taskId,
+		Title:       tr.Title,
+		Description: tr.Description,
+		Type:        tr.Type,
+		Status:      tr.Status,
+		Priority:    tr.Priority,
+		TeamId:      teamId,
+		Assignee: models.User{
+			Id: tr.AssigneeId,
+		},
+	}
+
+	task.DueDate, err = time.Parse("2006-01-02", tr.DueDate)
+
+	updatedTask, err := app.tasks.UpdateTeamTask(task)
+	if err != nil {
+		log.Println("Failed to update task:", err)
+		http.Error(w, "Failed to update task", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(updatedTask)
+}
 
 func (app *application) DeleteTeamTask(w http.ResponseWriter, r *http.Request) {
 	tmId, _ := mux.Vars(r)["teamId"]

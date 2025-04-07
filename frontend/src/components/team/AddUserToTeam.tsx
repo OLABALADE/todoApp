@@ -83,7 +83,7 @@ const AddUserToTeam: React.FC<AddUsersToTeamProps> = ({ team, setTeam }) => {
             {users.filter(user => !team?.members?.some(member => member.userId === user.userId))
               .map((user, index) => (
                 <option key={index} value={user.userId}>
-                  {user.name}
+                  {user.username}
                 </option>
               ))}
           </select>

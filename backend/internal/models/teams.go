@@ -13,12 +13,12 @@ type Team struct {
 	Description string    `json:"description"`
 	Members     []*Member `json:"members"`
 	Creator     string    `json:"creator"`
-	Created     time.Time `json:"created"`
+	Created     time.Time `json:"createdAt"`
 }
 
 type Member struct {
 	Id   int    `json:"userId"`
-	Name string `json:"name"`
+	Name string `json:"username"`
 	Role string `json:"role"`
 }
 

@@ -1,10 +1,14 @@
-import { Link } from "react-router";
+import { NavLink } from "react-router";
 import { ITeam } from "../models/Team.interface";
 import { useEffect, useState } from "react";
 
 const Sidebar: React.FC = () => {
   const [teams, setTeams] = useState<ITeam[]>([]);
   const [loading, setLoading] = useState(true);
+
+  const Active = ({ isActive }: { isActive: boolean }) =>
+    `text-sm ${isActive ? "text-green-300 font-bold" : ""}`
+
   useEffect(() => {
     const fetchTeams = async () => {
       try {
@@ -25,8 +29,8 @@ const Sidebar: React.FC = () => {
     <div className="w-64 bg-gray-800 text-white p-6 flex flex-col space-y-4">
       <div className="flex flex-col space-y-2 border-b-4 relative fixed">
         <h2 className="font-semibold"> Tasks </h2>
-        <Link className="text-sm" to="/personal/tasks">Personal</Link>
-        <Link className="text-sm mb-2" to="/teams/tasks">Team</Link>
+        <NavLink className={Active} to="/personal/tasks">Personal</NavLink>
+        <NavLink className={Active} end to="/teams">Team</NavLink>
       </div>
       <div>
         <h2 className="font-semibold"> Teams </h2>
@@ -34,12 +38,12 @@ const Sidebar: React.FC = () => {
           <ul>
             {teams?.map((team, index) => (
               <li key={index}>
-                <Link className="text-sm" to={`/teams/${team.teamId}`}> {team.name} </Link>
+                <NavLink className={Active} to={`/teams/${team.teamId}`}> {team.name} </NavLink>
               </li>
             ))}
           </ul>
         }
-        <Link className="text-sm" to={"/teams/create"}> + Create Team </Link>
+        <NavLink className={Active} to={"/teams/create"}> + Create Team </NavLink>
       </div>
     </div>
   )

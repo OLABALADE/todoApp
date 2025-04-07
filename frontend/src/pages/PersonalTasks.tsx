@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import TaskList from "../components/Task";
 import { PersonalTaskForm } from "../components/Form";
-import Sidebar from "../components/Sidebar";
 import { ITask } from "../models/Task.interface";
 
 const PersonalTasks: React.FC = () => {
@@ -35,7 +34,6 @@ const PersonalTasks: React.FC = () => {
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar />
       <div className="flex flex-col justify-center items-center p-6 w-full">
         <TaskList tasks={personalTasks} deleteTask={deletePersonalTask} />
         <PersonalTaskForm addTask={addPersonalTask} />

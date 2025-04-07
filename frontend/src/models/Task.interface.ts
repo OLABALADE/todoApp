@@ -1,3 +1,4 @@
+import { User } from "./User.interface";
 
 export interface ITask {
   id?: number,
@@ -5,10 +6,24 @@ export interface ITask {
   description: string,
   status: "pending" | "inProgress" | "done",
   priority: "low" | "medium" | "high",
-  type: "personal" | "team",
+  taskType: "personal" | "team",
   dueDate: string,
   creator?: string,
-  assignees?: string[],
-  teamId: number,
+  assignee?: User,
+  teamId: number | string,
+  created?: Date,
+}
+
+export interface ITaskOut {
+  id?: number,
+  title?: string,
+  description?: string,
+  status?: "pending" | "inProgress" | "done",
+  priority?: "low" | "medium" | "high",
+  taskType?: "personal" | "team",
+  dueDate?: string,
+  creator?: string,
+  assigneeId?: number,
+  teamId?: number | string,
   created?: Date,
 }

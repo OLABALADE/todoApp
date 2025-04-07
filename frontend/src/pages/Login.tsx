@@ -11,7 +11,7 @@ const Login: React.FC = () => {
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     try {
       e.preventDefault();
-      const response = await fetch("http://localhost:3000/api/users/login", {
+      await fetch("http://localhost:3000/api/users/login", {
         method: "POST",
         headers: {
           "Content-type": "application/json"
@@ -19,9 +19,6 @@ const Login: React.FC = () => {
         credentials: "include",
         body: JSON.stringify({ email, password })
       })
-
-      const data = await response.json();
-      setMessage(data.message);
       navigate("/dashboard");
     } catch (err) {
 

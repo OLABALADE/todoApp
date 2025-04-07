@@ -13,6 +13,20 @@ import (
 	"time"
 )
 
+type UserRequest struct {
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
+type UserResponse struct {
+	Id       int       `json:"userId"`
+	Name     string    `json:"username"`
+	Email    string    `json:"email"`
+	Password []byte    `json:"password,omitempty"`
+	Created  time.Time `json:"createdAt"`
+}
+
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		w.WriteHeader(http.StatusNotFound)
@@ -33,7 +47,7 @@ func (app *application) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := app.users.Insert(cred.Username, cred.Email, cred.Password)
+	user, err := app.users.Insert(cred.Username, cred.Email, cred.Password)
 	if err != nil {
 		if errors.Is(err, models.ErrDuplicateEmail) {
 			http.Error(w, "Email already used", http.StatusBadRequest)
@@ -44,9 +58,14 @@ func (app *application) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(map[string]string{
-		"message": "Signup Successful",
-	})
+	ur := &UserResponse{
+		Id:      user.Id,
+		Name:    user.Name,
+		Email:   user.Email,
+		Created: user.Created,
+	}
+
+	json.NewEncoder(w).Encode(ur)
 }
 
 func (app *application) Login(w http.ResponseWriter, r *http.Request) {
@@ -91,12 +110,6 @@ func (app *application) Login(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		SameSite: http.SameSiteNoneMode,
 	})
-
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]string{
-		"username": cred.Username,
-		"message":  "Login Successful",
-	})
 }
 
 func (app *application) GetUser(w http.ResponseWriter, r *http.Request) {
@@ -120,7 +133,19 @@ func (app *application) GetUsers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	json.NewEncoder(w).Encode(users)
+	usersData := []*UserResponse{}
+	for _, user := range users {
+		ur := &UserResponse{
+			Id:      user.Id,
+			Name:    user.Name,
+			Email:   user.Email,
+			Created: user.Created,
+		}
+
+		usersData = append(usersData, ur)
+	}
+
+	json.NewEncoder(w).Encode(usersData)
 }
 
 func (app *application) DeleteUser(w http.ResponseWriter, r *http.Request) {

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { User } from "../../models/User.interface";
-import { ITask } from "../../models/Task.interface";
+import { ITask, ITaskOut } from "../../models/Task.interface";
 
 interface AssignTaskProps {
   teamId: number,
@@ -9,17 +9,19 @@ interface AssignTaskProps {
 
 const AssignTask: React.FC<AssignTaskProps> = ({ teamId, addTask }) => {
   const [members, setMembers] = useState<User[]>([])
-  const [task, setTask] = useState<ITask>({
+  const [task, setTask] = useState<ITaskOut>({
     title: "",
     description: "",
     status: "pending",
     priority: "low",
-    type: "team",
+    taskType: "team",
     dueDate: "",
     teamId: teamId,
+    assigneeId: 0,
   })
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
       const response = await fetch(`http://localhost:3000/api/teams/${teamId}/tasks`, {
         method: "POST",
@@ -29,22 +31,26 @@ const AssignTask: React.FC<AssignTaskProps> = ({ teamId, addTask }) => {
 
       const data: ITask = await response.json();
       addTask(data);
+      setTask({
+        title: "",
+        description: "",
+        status: "pending",
+        priority: "low",
+        taskType: "team",
+        dueDate: "",
+        teamId: teamId,
+        assigneeId: 0,
+      })
     } catch (err) {
       console.log(err);
     }
   }
 
   const handleUserSelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const options = e.target.options;
-    const selected: string[] = [];
-    for (let i = 0; i < options.length; i++) {
-      if (options[i].selected) {
-        selected.push(options[i].value)
-      }
-    }
+    const memeberId = Number(e.target.value);
     setTask((prev) => ({
       ...prev,
-      assignees: selected,
+      assigneeId: memeberId
     }));
   }
 
@@ -64,6 +70,12 @@ const AssignTask: React.FC<AssignTaskProps> = ({ teamId, addTask }) => {
         })
         const data: User[] = await response.json();
         setMembers(data);
+        setTask(prev => (
+          {
+            ...prev,
+            assigneeId: data[0].userId
+          }
+        ))
       } catch (err) {
         console.log(err);
       }
@@ -72,7 +84,7 @@ const AssignTask: React.FC<AssignTaskProps> = ({ teamId, addTask }) => {
   }, [])
 
   return (
-    <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+    <div className="bg-gray-50 p-8 rounded-lg shadow-lg w-full max-w-md">
       <h2 className="text-2xl font-semibold text-center mb-6">Assign Task</h2>
 
       <form onSubmit={handleSubmit}>
@@ -147,18 +159,16 @@ const AssignTask: React.FC<AssignTaskProps> = ({ teamId, addTask }) => {
           </label>
           <select
             id="users"
-            multiple
-            value={task.assignees}
+            value={task.assigneeId}
             onChange={handleUserSelection}
             className="border border-gray-300 rounded p-2 w-full"
           >
             {members.map((member, index) => (
               <option key={index} value={member.userId}>
-                {member.name}
+                {member.username}
               </option>
             ))}
           </select>
-          <p className="text-sm text-gray-600 mt-2">Hold Ctrl (Cmd on Mac) to select multiple users.</p>
         </div>
 
         {/* Submit */}

@@ -38,8 +38,8 @@ func (app *application) routes() *mux.Router {
 	mux.HandleFunc("/api/teams/{teamId}/tasks", mid.Auth(app.CreateTeamTask)).Methods("POST")
 	mux.HandleFunc("/api/teams/{teamId}/tasks", mid.Auth(app.GetTeamTasks)).Methods("GET")
 	mux.HandleFunc("/api/teams/{teamId}/tasks/{taskId}", mid.Auth(app.GetTeamTask)).Methods("GET")
-	mux.HandleFunc("/api/teams/{teamId}/tasks/{taskId}", mid.Auth(app.UpdateTeamTask)).Methods("GET")
-	mux.HandleFunc("/api/teams/{teamId}/tasks/{taskId}", mid.Auth(app.DeleteTeamTask)).Methods("GET")
+	mux.HandleFunc("/api/teams/{teamId}/tasks/{taskId}", mid.Auth(app.UpdateTeamTask)).Methods("PUT")
+	mux.HandleFunc("/api/teams/{teamId}/tasks/{taskId}", mid.Auth(app.DeleteTeamTask)).Methods("DELETE")
 
 	mux.HandleFunc("/api/teams/{teamId}/projects", mid.Auth(app.CreateProject)).Methods("POST")
 	mux.HandleFunc("/api/teams/{teamId}/projects", mid.Auth(app.GetProjects)).Methods("GET")

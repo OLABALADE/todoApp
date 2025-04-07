@@ -1,7 +1,6 @@
 import React, { useContext, useEffect, useState } from "react"
 import { ITeam } from "../../models/Team.interface";
 import { useParams } from "react-router";
-import Sidebar from "../../components/Sidebar";
 import TeamDetail from "../../components/team/TeamDetails";
 import { AuthContext } from "../../components/Auth";
 
@@ -35,10 +34,7 @@ const Team: React.FC = () => {
   }
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <TeamDetail team={team} setTeam={setTeam} />
-    </div>
+    <TeamDetail team={team} setTeam={setTeam} />
   )
 }
 

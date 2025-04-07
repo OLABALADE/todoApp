@@ -1,5 +1,4 @@
 import { useEffect, useContext } from 'react';
-import Sidebar from '../components/Sidebar';
 import TeamList from '../components/team/TeamList';
 import { AuthContext } from '../components/Auth';
 
@@ -17,12 +16,8 @@ const Dashboard: React.FC = () => {
   }, [])
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <TeamList />
-    </div>
+    <TeamList />
   );
 }
-
 
 export default Dashboard;

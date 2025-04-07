@@ -11,10 +11,10 @@ import (
 
 type User struct {
 	Id       int       `json:"userId"`
-	Name     string    `json:"name"`
-	Email    string    `json:"email"`
-	Password []byte    `json:"password"`
-	Created  time.Time `json:"created"`
+	Name     string    `json:"username"`
+	Email    string    `json:"email,omitempty"`
+	Password []byte    `json:"password,omitempty"`
+	Created  time.Time `json:"createdAt,omitempty"`
 }
 
 type UserModel struct {
@@ -59,21 +59,28 @@ func (m *UserModel) GetUsers() ([]*User, error) {
 	return users, nil
 }
 
-func (m *UserModel) Insert(name, email, password string) error {
+func (m *UserModel) Insert(name, email, password string) (*User, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), 12)
 
 	if err != nil {
-		return err
+		return nil, err
 	}
 	stmt := `insert into users(name, email, password) 
-  values($1, $2, $3)`
+  values($1, $2, $3) returning id, name, email, created_at`
 
-	_, err = m.DB.Exec(context.Background(), stmt, name, email, string(hashedPassword))
+	user := &User{}
+	err = m.DB.QueryRow(context.Background(), stmt, name, email, string(hashedPassword)).Scan(
+		&user.Id,
+		&user.Name,
+		&user.Email,
+		&user.Created,
+	)
+
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return user, nil
 }
 
 func (m *UserModel) Delete(id int) error {

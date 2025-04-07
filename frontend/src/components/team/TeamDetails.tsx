@@ -69,10 +69,10 @@ const TeamDetail: React.FC<TeamDetailProps> = ({ team, setTeam }) => {
             {team?.members?.map((member, index) => (
               <li className="flex justify-between mx-auto items-center text-gray-600 ml-4" key={index}>
                 <div>
-                  <p>{member.name}</p>
+                  <p>{member.username}</p>
                 </div>
                 {
-                  member.name === team.creator ? <></> :
+                  member.username === team.creator ? <></> :
                     <div>
                       <button
                         className="cursor-pointer bg-blue-500 rounded-lg text-sm text-white font-semibold px-2"

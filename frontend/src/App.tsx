@@ -1,8 +1,8 @@
-import SiteRoutes from "./components/Routes";
+import AppRoutes from "./components/Routes";
 
 function App() {
   return (
-    <SiteRoutes />
+    <AppRoutes />
   )
 }
 

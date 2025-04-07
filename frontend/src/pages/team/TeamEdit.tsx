@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { AuthContext } from "../../components/Auth";
 import { ITeam } from "../../models/Team.interface";
-import Sidebar from "../../components/Sidebar";
 import EditTeam from "../../components/team/EditTeam";
 
 const TeamEdit: React.FC = () => {
@@ -35,10 +34,7 @@ const TeamEdit: React.FC = () => {
   }, [])
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <EditTeam team={team} setTeam={SetTeam} />
-    </div>
+    <EditTeam team={team} setTeam={SetTeam} />
   )
 }
 

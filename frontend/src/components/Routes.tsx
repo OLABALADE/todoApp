@@ -4,26 +4,36 @@ import Signup from "../pages/Signup";
 import Home from "../pages/Home";
 import Dashboard from "../pages/Dashboard";
 import PersonalTasks from "../pages/PersonalTasks";
-import TeamTasks from "../pages/team/TeamTasks";
+import TeamTasks from "../pages/task/TeamTasks";
 import Team from "../pages/team/Team";
 import TeamCreate from "../pages/team/TeamCreate";
 import TeamEdit from "../pages/team/TeamEdit";
+import Teams from "../pages/team/Teams";
+import MainLayout from "../layouts/MainLayout";
+import NoSidebarLayout from "../layouts/NoSidebarLayout";
+import TeamTaskEdit from "../pages/task/TeamTaskEdit";
 
-const SiteRoutes = () => {
+const AppRoutes = () => {
   return (
     <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/personal/tasks" element={<PersonalTasks />} />
+      <Route element={<NoSidebarLayout />}>
+        <Route path="/" element={<Home />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+      </Route>
 
-      <Route path="/teams/create" element={< TeamCreate />} />
-      <Route path="/teams/:id/edit" element={< TeamEdit />} />
-      <Route path="/teams/:id" element={< Team />} />
-      <Route path="/teams/:id/tasks" element={< TeamTasks />} />
-    </Routes>
+      <Route element={<MainLayout />}>
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/personal/tasks" element={<PersonalTasks />} />
+        <Route path="/teams/create" element={< TeamCreate />} />
+        <Route path="/teams" element={< Teams />} />
+        <Route path="/teams/:id/edit" element={< TeamEdit />} />
+        <Route path="/teams/:id" element={< Team />} />
+        <Route path="/teams/:id/tasks" element={< TeamTasks />} />
+        <Route path="/teams/:teamId/tasks/:taskId/edit" element={< TeamTaskEdit />} />
+      </Route>
+    </Routes >
   )
 }
 
-export default SiteRoutes;
+export default AppRoutes;
