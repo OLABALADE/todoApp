@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { ITask } from "../models/Task.interface";
-import PersonalTaskList from "../components/task/PersonalTaskList";
+import { ITask } from "../../models/Task.interface";
+import PersonalTaskList from "../../components/task/PersonalTaskList";
 
 const PersonalTasks: React.FC = () => {
   const [personalTasks, setPersonalTasks] = useState<ITask[]>();

@@ -1,32 +1,20 @@
-import { Dispatch, FC, FormEvent, SetStateAction, useContext, useEffect, useState } from "react";
+import { Dispatch, FC, FormEvent, SetStateAction, useContext } from "react";
 import { ITask, ITaskOut } from "../../models/Task.interface";
 import { AuthContext } from "../Auth";
 import { useNavigate } from "react-router";
-import { User } from "../../models/User.interface";
 
-interface EditTeamTaskProps {
-  teamId: number,
-  task: ITaskOut,
+interface EditPersonalTaskProps {
+  task: ITaskOut | undefined,
   setTask: Dispatch<SetStateAction<ITask>>
 }
 
-const EditTeamTask: FC<EditTeamTaskProps> = ({ task, teamId, setTask }) => {
-  const [members, setMembers] = useState<User[]>([])
+const EditPersonalTask: FC<EditPersonalTaskProps> = ({ task, setTask }) => {
   const auth = useContext(AuthContext);
   const navigate = useNavigate();
   const date = task?.dueDate ? new Date(task.dueDate) : null;
   const dateInputValue = date && !isNaN(date.getTime())
     ? date.toISOString().split("T")[0]
     : "";
-
-
-  const handleUserSelection = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const memeberId = Number(e.target.value);
-    setTask((prev) => ({
-      ...prev,
-      assigneeId: memeberId
-    }));
-  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -39,7 +27,7 @@ const EditTeamTask: FC<EditTeamTaskProps> = ({ task, teamId, setTask }) => {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     try {
-      const url = `http://localhost:3000/api/teams/${task.teamId}/tasks/${task.taskId}`
+      const url = `http://localhost:3000/api/tasks/${task?.taskId}`
       const response = await fetch(url, {
         credentials: "include",
         method: "PUT",
@@ -47,32 +35,11 @@ const EditTeamTask: FC<EditTeamTaskProps> = ({ task, teamId, setTask }) => {
       })
 
       if (response.status === 401) auth?.onFailure();
-      navigate(`/teams/${task.teamId}/tasks`)
+      navigate(`/personal/tasks`)
     } catch (err) {
       console.log(err);
     }
   }
-
-  useEffect(() => {
-    const fetchMembers = async () => {
-      try {
-        const response = await fetch(`http://localhost:3000/api/teams/${teamId}/members`, {
-          credentials: "include",
-        })
-        const data: User[] = await response.json();
-        setMembers(data);
-        setTask(prev => (
-          {
-            ...prev,
-            assigneeId: data[0].userId
-          }
-        ))
-      } catch (err) {
-        console.log(err);
-      }
-    }
-    fetchMembers();
-  }, [])
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100 w-full">
       <div className="bg-white p-8 rounded-lg shadow-lg min-w-8 mx-4">
@@ -111,7 +78,7 @@ const EditTeamTask: FC<EditTeamTaskProps> = ({ task, teamId, setTask }) => {
             <select
               id="priority"
               name="priority"
-              value={task.priority}
+              value={task?.priority}
               onChange={handleChange}
               className="border border-gray-300 rounded p-2 w-full"
             >
@@ -136,26 +103,6 @@ const EditTeamTask: FC<EditTeamTaskProps> = ({ task, teamId, setTask }) => {
               required
             />
           </div>
-
-          {/* Member Selection */}
-          <div className="mb-4">
-            <label htmlFor="users" className="block text-gray-700 font-semibold mb-2">
-              Assign To:
-            </label>
-            <select
-              id="users"
-              value={task.assigneeId}
-              onChange={handleUserSelection}
-              className="border border-gray-300 rounded p-2 w-full"
-            >
-              {members.map((member, index) => (
-                <option key={index} value={member.userId}>
-                  {member.username}
-                </option>
-              ))}
-            </select>
-          </div>
-
           <button
             type="submit"
             className="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Done</button>
@@ -165,4 +112,4 @@ const EditTeamTask: FC<EditTeamTaskProps> = ({ task, teamId, setTask }) => {
   )
 }
 
-export default EditTeamTask;
+export default EditPersonalTask;

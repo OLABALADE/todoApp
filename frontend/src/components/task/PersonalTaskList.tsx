@@ -1,6 +1,7 @@
 import { Dispatch, FC, SetStateAction } from "react";
 import { ITask } from "../../models/Task.interface";
 import AddPersonalTask from "./AddPersonalTask";
+import Task from "./Task";
 
 interface PersonalTaskListProps {
   tasks: ITask[] | undefined,
@@ -20,7 +21,7 @@ const PersonalTaskList: FC<PersonalTaskListProps> = ({ tasks, setTasks }) => {
         credentials: "include"
       })
       setTasks(prev => (
-        prev?.filter(task => task.id !== taskId)
+        prev?.filter(task => task.taskId !== taskId)
       ))
     } catch (err) {
       console.log(err)
@@ -38,19 +39,11 @@ const PersonalTaskList: FC<PersonalTaskListProps> = ({ tasks, setTasks }) => {
               <li key={index}
                 className="bg-gray-50 p-4 rounded-lg shadow-md flex justify-between items-center"
               >
-                <div>
-                  <h3 className="text-lg font-medium">Title: {task.title}</h3>
-                  <p className="text-sm font-meduim">Description: {task.description}</p>
-                  <p className="text-sm font-meduim"> Status: {task.status}</p>
-                  <p className="text-sm font-meduim"> Priority: {task.priority}</p>
-                  <p className="text-sm font-meduim"> DueDate: {task.dueDate}</p>
-                  <button
-                    className="bg-blue-400 text-white rounded-lg px-3 mt-3 font-semibold"
-                    onClick={e => deleteTask(e, task?.id)}
-                  >
-                    Delete Task
-                  </button>
-                </div>
+                <Task
+                  task={task}
+                  deleteTask={deleteTask}
+                  isTeam={false}
+                />
               </li>
             ))}
           </ul>

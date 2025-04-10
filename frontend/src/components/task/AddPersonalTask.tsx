@@ -51,7 +51,7 @@ const AddPersonalTask: FC<{ addTask: (task: ITask) => void }> = ({ addTask }) =>
   }
   return (
     <div className="bg-gray-50 p-8 rounded-lg shadow-lg w-full max-w-md">
-      <h2 className="text-2xl font-semibold text-center mb-6">Assign Task</h2>
+      <h2 className="text-2xl font-semibold text-center mb-6">Add Task</h2>
 
       <form onSubmit={handleSubmit}>
         {/* Task Title */}

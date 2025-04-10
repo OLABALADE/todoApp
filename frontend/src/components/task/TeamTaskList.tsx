@@ -3,6 +3,7 @@ import { ITask } from "../../models/Task.interface";
 import AssignTask from "../team/AssignTask";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router";
+import Task from "./Task";
 
 interface TeamTaskListProps {
   teamId: number,
@@ -23,7 +24,7 @@ const TeamTaskList: React.FC<TeamTaskListProps> = ({ tasks, teamId, setTasks }) 
         credentials: "include"
       })
       setTasks(prev => (
-        prev.filter(task => task.id !== taskId)
+        prev.filter(task => task.taskId !== taskId)
       ))
     } catch (err) {
       console.log(err)
@@ -41,24 +42,11 @@ const TeamTaskList: React.FC<TeamTaskListProps> = ({ tasks, teamId, setTasks }) 
               <li key={index}
                 className="bg-gray-50 p-4 rounded-lg shadow-md flex justify-between items-center"
               >
-                <div>
-                  <h3 className="text-lg font-medium">Title: {task.title}</h3>
-                  <p className="text-sm font-meduim">Description: {task.description}</p>
-                  <p className="text-sm font-meduim"> Status: {task.status}</p>
-                  <p className="text-sm font-meduim"> Priority: {task.priority}</p>
-                  <p className="text-sm font-meduim"> DueDate: {task.dueDate}</p>
-                  <p className="text-sm font-meduim"> Assignee: {task.assignee?.username}</p>
-                  <div className="flex space-x-2">
-                    <TrashIcon className="h-7 :hover bg-red"
-                      onClick={e => deleteTask(e, task?.id)}
-                    />
-                    <Link
-                      to={`/teams/${task.teamId}/tasks/${task.id}/edit`}
-                    >
-                      <PencilSquareIcon className="h-7" />
-                    </Link>
-                  </div>
-                </div>
+                <Task
+                  task={task}
+                  deleteTask={deleteTask}
+                  isTeam={true}
+                />
               </li>
             ))}
           </ul>

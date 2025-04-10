@@ -3,7 +3,7 @@ import Login from "../pages/Login";
 import Signup from "../pages/Signup";
 import Home from "../pages/Home";
 import Dashboard from "../pages/Dashboard";
-import PersonalTasks from "../pages/PersonalTasks";
+import PersonalTasks from "../pages/task/PersonalTasks";
 import TeamTasks from "../pages/task/TeamTasks";
 import Team from "../pages/team/Team";
 import TeamCreate from "../pages/team/TeamCreate";
@@ -12,6 +12,7 @@ import Teams from "../pages/team/Teams";
 import MainLayout from "../layouts/MainLayout";
 import NoSidebarLayout from "../layouts/NoSidebarLayout";
 import TeamTaskEdit from "../pages/task/TeamTaskEdit";
+import PersonalTaskEdit from "../pages/task/PersonalTaskEdit";
 
 const AppRoutes = () => {
   return (
@@ -25,6 +26,7 @@ const AppRoutes = () => {
       <Route element={<MainLayout />}>
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/personal/tasks" element={<PersonalTasks />} />
+        <Route path="/personal/tasks/:taskId/edit" element={<PersonalTaskEdit />} />
         <Route path="/teams/create" element={< TeamCreate />} />
         <Route path="/teams" element={< Teams />} />
         <Route path="/teams/:id/edit" element={< TeamEdit />} />

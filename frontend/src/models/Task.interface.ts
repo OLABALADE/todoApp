@@ -1,7 +1,7 @@
 import { User } from "./User.interface";
 
 export interface ITask {
-  id?: number,
+  taskId?: number,
   title: string,
   description: string,
   status: "pending" | "inProgress" | "done",
@@ -15,7 +15,7 @@ export interface ITask {
 }
 
 export interface ITaskOut {
-  id?: number,
+  taskId?: number,
   title?: string,
   description?: string,
   status?: "pending" | "inProgress" | "done",
