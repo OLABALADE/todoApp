@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"github.com/OLABALADE/todoApp/backend/internal/schemas"
 	"github.com/OLABALADE/todoApp/backend/pkg/middleware"
 	"github.com/gorilla/mux"
 	"log"
@@ -9,19 +10,9 @@ import (
 	"strconv"
 )
 
-type MemberRequest struct {
-	UserId int `json:"userId"`
-}
-
-type TeamRequest struct {
-	Id          int    `json:"teamId"`
-	Name        string `json:"name"`
-	Description string `json:"description"`
-}
-
 func (app *application) CreateTeam(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value(middleware.ContextKey("userId")).(int)
-	tr := &TeamRequest{}
+	tr := &schemas.TeamRequest{}
 	err := json.NewDecoder(r.Body).Decode(tr)
 	if err != nil {
 		http.Error(w, "Could not create team", http.StatusBadRequest)
@@ -112,7 +103,7 @@ func (app *application) UpdateTeam(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tr := &TeamRequest{}
+	tr := &schemas.TeamRequest{}
 	err = json.NewDecoder(r.Body).Decode(tr)
 	if err != nil {
 		log.Println("Failed to decode json:", err)
@@ -150,7 +141,7 @@ func (app *application) DeleteTeam(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) AddMemberToTeam(w http.ResponseWriter, r *http.Request) {
-	mr := &MemberRequest{}
+	mr := &schemas.MemberRequest{}
 	err := json.NewDecoder(r.Body).Decode(mr)
 
 	if err != nil {

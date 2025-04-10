@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/OLABALADE/todoApp/backend/internal/models"
+	"github.com/OLABALADE/todoApp/backend/internal/schemas"
 	"github.com/OLABALADE/todoApp/backend/pkg/middleware"
 	"github.com/gorilla/mux"
 	"log"
@@ -11,57 +11,25 @@ import (
 	"time"
 )
 
-type TaskRequest struct {
-	Title       string `json:"title"`
-	Description string `json:"description"`
-	Type        string `json:"taskType"`
-	Status      string `json:"status"`
-	Priority    string `json:"priority"`
-	DueDate     string `json:"dueDate"`
-	TeamId      int    `json:"teamId"`
-	AssigneeId  int    `json:"assigneeId"`
-	ProjectId   int    `json:"projectId"`
-}
-
-type TaskResponse struct {
-	Title       string      `json:"title"`
-	Description string      `json:"description"`
-	Type        string      `json:"taskType"`
-	Status      string      `json:"status"`
-	Priority    string      `json:"priority"`
-	DueDate     string      `json:"dueDate"`
-	TeamId      int         `json:"teamId"`
-	AssigneeId  models.User `json:"assignee"`
-}
-
 func (app *application) CreatePersonalTask(w http.ResponseWriter, r *http.Request) {
 	userId, _ := r.Context().Value(middleware.ContextKey("userId")).(int)
 
-	tr := &TaskRequest{}
+	tr := &schemas.TaskRequest{}
 	err := json.NewDecoder(r.Body).Decode(tr)
 	if err != nil {
 		log.Println("Could not decode json request:", err)
 		http.Error(w, "400 - Bad Request", http.StatusBadRequest)
 		return
 	}
-
-	newTask := &models.Task{
-		Title:       tr.Title,
-		Description: tr.Description,
-		Type:        tr.Type,
-		Status:      tr.Status,
-		Priority:    tr.Priority,
-		CreatorId:   userId,
-	}
-
-	newTask.DueDate, err = time.Parse("2006-01-02", tr.DueDate)
+	tr.CreatorId = userId
+	tr.DueDate, err = time.Parse("2006-01-02", tr.SDueDate)
 	if err != nil {
 		log.Println("Failed to parse date:", err)
 		http.Error(w, "Failed parse date", http.StatusBadRequest)
 		return
 	}
 
-	taskId, err := app.tasks.InsertPersonalTask(newTask)
+	taskId, err := app.tasks.InsertPersonalTask(tr)
 	if err != nil {
 		log.Println("Personal Task not created:", err)
 		http.Error(w, "Personal Task not created", http.StatusNotImplemented)
@@ -127,6 +95,22 @@ func (app *application) GetPersonalTask(w http.ResponseWriter, r *http.Request) 
 }
 
 func (app *application) UpdatePersonalTask(w http.ResponseWriter, r *http.Request) {
+	tr := &schemas.TaskRequest{}
+	err := json.NewDecoder(r.Body).Decode(tr)
+	if err != nil {
+		log.Println("Failed to decode json:", err)
+		http.Error(w, "Bad Request body", http.StatusBadRequest)
+		return
+	}
+
+	updatedTask, err := app.tasks.UpdatePersonalTask(tr)
+	if err != nil {
+		log.Println("Error while updating tasks:", err)
+		http.Error(w, "Error while updating tasks", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(updatedTask)
 }
 
 func (app *application) DeletePersonalTask(w http.ResponseWriter, r *http.Request) {
@@ -158,34 +142,24 @@ func (app *application) CreateTeamTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tr := &TaskRequest{}
+	tr := &schemas.TaskRequest{}
 	err = json.NewDecoder(r.Body).Decode(tr)
 	if err != nil {
 		http.Error(w, "Invalid Request body", http.StatusBadRequest)
 		return
 	}
 
-	newTask := &models.Task{
-		Title:       tr.Title,
-		Description: tr.Description,
-		Type:        tr.Type,
-		Status:      tr.Status,
-		Priority:    tr.Priority,
-		TeamId:      teamId,
-		Assignee: models.User{
-			Id: tr.AssigneeId,
-		},
-		CreatorId: userId,
-	}
+	tr.CreatorId = userId
+	tr.TeamId = teamId
 
-	newTask.DueDate, err = time.Parse("2006-01-02", tr.DueDate)
+	tr.DueDate, err = time.Parse("2006-01-02", tr.SDueDate)
 	if err != nil {
 		log.Println("Failed to parse date:", err)
 		http.Error(w, "Failed parse date", http.StatusBadRequest)
 		return
 	}
 
-	task, err := app.tasks.InsertTeamTask(newTask)
+	task, err := app.tasks.InsertTeamTask(tr)
 	if err != nil {
 		log.Println("Failed to create team task:", err)
 		http.Error(w, "Failed to create team tasks", http.StatusInternalServerError)
@@ -246,7 +220,9 @@ func (app *application) UpdateTeamTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tr := &TaskRequest{}
+	tr := &schemas.TaskRequest{}
+	tr.TeamId = teamId
+	tr.Id = taskId
 	err := json.NewDecoder(r.Body).Decode(tr)
 	if err != nil {
 		log.Println("Invalid json data:", err)
@@ -254,22 +230,9 @@ func (app *application) UpdateTeamTask(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	task := &models.Task{
-		ID:          taskId,
-		Title:       tr.Title,
-		Description: tr.Description,
-		Type:        tr.Type,
-		Status:      tr.Status,
-		Priority:    tr.Priority,
-		TeamId:      teamId,
-		Assignee: models.User{
-			Id: tr.AssigneeId,
-		},
-	}
+	tr.DueDate, err = time.Parse("2006-01-02", tr.SDueDate)
 
-	task.DueDate, err = time.Parse("2006-01-02", tr.DueDate)
-
-	updatedTask, err := app.tasks.UpdateTeamTask(task)
+	updatedTask, err := app.tasks.UpdateTeamTask(tr)
 	if err != nil {
 		log.Println("Failed to update task:", err)
 		http.Error(w, "Failed to update task", http.StatusInternalServerError)
@@ -299,7 +262,7 @@ func (app *application) DeleteTeamTask(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// //////////////////// Project Tasks //////////////////////////
+/* // //////////////////// Project Tasks //////////////////////////
 func (app *application) CreateProjectTask(w http.ResponseWriter, r *http.Request) {
 	userId, _ := r.Context().Value(middleware.ContextKey("userId")).(int)
 	tId, _ := mux.Vars(r)["teamId"]
@@ -312,7 +275,7 @@ func (app *application) CreateProjectTask(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	tr := &TaskRequest{}
+	tr := &schemas.TaskRequest{}
 	err := json.NewDecoder(r.Body).Decode(tr)
 	if err != nil {
 		http.Error(w, "Invalid Request body", http.StatusBadRequest)
@@ -414,4 +377,4 @@ func (app *application) DeleteProjectTask(w http.ResponseWriter, r *http.Request
 	}
 }
 
-func (app *application) UpdateProjectTask(w http.ResponseWriter, r *http.Request) {}
+func (app *application) UpdateProjectTask(w http.ResponseWriter, r *http.Request) {} */

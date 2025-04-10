@@ -2,25 +2,11 @@ package models
 
 import (
 	"context"
+
+	"github.com/OLABALADE/todoApp/backend/internal/schemas"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	"time"
 )
-
-type Team struct {
-	Id          int       `json:"teamId"`
-	Name        string    `json:"name"`
-	Description string    `json:"description"`
-	Members     []*Member `json:"members"`
-	Creator     string    `json:"creator"`
-	Created     time.Time `json:"createdAt"`
-}
-
-type Member struct {
-	Id   int    `json:"userId"`
-	Name string `json:"username"`
-	Role string `json:"role"`
-}
 
 type TeamModel struct {
 	DB *pgxpool.Pool
@@ -43,7 +29,7 @@ func (m *TeamModel) Insert(name, desc string, creatorId int) (int, error) {
 	return rowIds[0], nil
 }
 
-func (m *TeamModel) GetTeams(userId int) ([]*Team, error) {
+func (m *TeamModel) GetTeams(userId int) ([]*schemas.TeamResponse, error) {
 	stmt := `select t.id, t.name, t.description from teams t
   join team_members tm on t.id = tm.team_id where tm.user_id = $1`
 
@@ -52,9 +38,9 @@ func (m *TeamModel) GetTeams(userId int) ([]*Team, error) {
 		return nil, err
 	}
 
-	teams := []*Team{}
+	teams := []*schemas.TeamResponse{}
 	for rows.Next() {
-		t := &Team{}
+		t := &schemas.TeamResponse{}
 		err = rows.Scan(&t.Id, &t.Name, &t.Description)
 		if err != nil {
 			return nil, err
@@ -65,12 +51,12 @@ func (m *TeamModel) GetTeams(userId int) ([]*Team, error) {
 	return teams, nil
 }
 
-func (m *TeamModel) GetTeam(id int) (*Team, error) {
+func (m *TeamModel) GetTeam(id int) (*schemas.TeamResponse, error) {
 	stmt := `select t.id, t.name, t.description, u.name, t.created_at from teams t
   join users u on u.id = creator_id where t.id = $1`
 	row := m.DB.QueryRow(context.Background(), stmt, id)
 
-	t := &Team{}
+	t := &schemas.TeamResponse{}
 	err := row.Scan(&t.Id, &t.Name, &t.Description, &t.Creator, &t.Created)
 	if err != nil {
 		return nil, err
@@ -78,12 +64,12 @@ func (m *TeamModel) GetTeam(id int) (*Team, error) {
 	return t, nil
 }
 
-func (m *TeamModel) Update(id int, name, description string) (*Team, error) {
+func (m *TeamModel) Update(id int, name, description string) (*schemas.TeamResponse, error) {
 	stmt := `update teams set name = $1,
   description = $2 
   where id = $3 returning id, name, description`
 
-	t := &Team{}
+	t := &schemas.TeamResponse{}
 	err := m.DB.QueryRow(context.Background(),
 		stmt,
 		name,
@@ -106,7 +92,7 @@ func (m *TeamModel) Delete(id int) error {
 	return nil
 }
 
-func (m *TeamModel) GetMembers(teamId int) ([]*Member, error) {
+func (m *TeamModel) GetMembers(teamId int) ([]*schemas.MemberResponse, error) {
 	stmt := `select u.id, u.name, tm.role from users u 
   join team_members tm on u.id = tm.user_id
   where tm.team_id = $1`
@@ -116,9 +102,9 @@ func (m *TeamModel) GetMembers(teamId int) ([]*Member, error) {
 		return nil, err
 	}
 
-	members := []*Member{}
+	members := []*schemas.MemberResponse{}
 	for rows.Next() {
-		tm := &Member{}
+		tm := &schemas.MemberResponse{}
 		err = rows.Scan(&tm.Id, &tm.Name, &tm.Role)
 		if err != nil {
 			return nil, err

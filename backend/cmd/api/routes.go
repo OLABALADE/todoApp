@@ -23,7 +23,7 @@ func (app *application) routes() *mux.Router {
 	mux.HandleFunc("/api/tasks", mid.Auth(app.CreatePersonalTask)).Methods("POST")
 	mux.HandleFunc("/api/tasks", mid.Auth(app.GetPersonalTasks)).Methods("GET")
 	mux.HandleFunc("/api/tasks/{taskId}", mid.Auth(app.GetPersonalTask)).Methods("GET")
-	mux.HandleFunc("/api/tasks/{taskId}", mid.Auth(app.UpdatePersonalTask)).Methods("PATCH")
+	mux.HandleFunc("/api/tasks/{taskId}", mid.Auth(app.UpdatePersonalTask)).Methods("PUT")
 	mux.HandleFunc("/api/tasks/{taskId}", mid.Auth(app.DeletePersonalTask)).Methods("DELETE")
 
 	mux.HandleFunc("/api/teams", mid.Auth(app.CreateTeam)).Methods("POST")
@@ -48,11 +48,11 @@ func (app *application) routes() *mux.Router {
 	mux.HandleFunc("/api/teams/{teamId}/projects/{projectId}", mid.Auth(app.UpdateProject)).Methods("PATCH")
 	mux.HandleFunc("/api/teams/{teamId}/projects/{projectId}", mid.Auth(app.DeleteProject)).Methods("DELETE")
 
-	mux.HandleFunc("/api/teams/{teamId}/projects/{projectId}/tasks", mid.Auth(app.CreateProjectTask)).Methods("POST")
+	/* mux.HandleFunc("/api/teams/{teamId}/projects/{projectId}/tasks", mid.Auth(app.CreateProjectTask)).Methods("POST")
 	mux.HandleFunc("/api/teams/{teamId}/projects/{projectId}/tasks", mid.Auth(app.GetProjectTasks)).Methods("GET")
 	mux.HandleFunc("/api/teams/{teamId}/projects/{projectId}/tasks/{taskId}", mid.Auth(app.GetProjectTask)).Methods("GET")
 	mux.HandleFunc("/api/teams/{teamId}/projects/{projectId}/tasks/{taskId}", mid.Auth(app.UpdateProjectTask)).Methods("PATCH")
-	mux.HandleFunc("/api/teams/{teamId}/projects/{projectId}/tasks/{taskId}", mid.Auth(app.DeleteProjectTask)).Methods("DELETE")
+	mux.HandleFunc("/api/teams/{teamId}/projects/{projectId}/tasks/{taskId}", mid.Auth(app.DeleteProjectTask)).Methods("DELETE") */
 
 	return mux
 }
