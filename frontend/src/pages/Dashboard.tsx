@@ -7,9 +7,10 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const fetchAuthStatus = async () => {
       try {
-        await fetch("http://localhost:3000/api/auth/verify-token")
+        const response = await fetch("http://localhost:3000/api/auth/verify-token")
+        if (response.status === 401) auth?.onFailure();
       } catch (err) {
-        auth?.onFailure();
+        console.log(err)
       }
     }
     fetchAuthStatus();

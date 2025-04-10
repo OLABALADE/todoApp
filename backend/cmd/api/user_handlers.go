@@ -112,6 +112,21 @@ func (app *application) Login(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (app *application) Logout(w http.ResponseWriter, r *http.Request) {
+	http.SetCookie(w, &http.Cookie{
+		Name:     "token",
+		Value:    "",
+		Path:     "/",
+		Expires:  time.Now().Add(-time.Hour),
+		MaxAge:   -1,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
+	})
+
+	w.WriteHeader(http.StatusOK)
+}
+
 func (app *application) GetUser(w http.ResponseWriter, r *http.Request) {
 	userId, _ := r.Context().Value(middleware.ContextKey("userId")).(int)
 

@@ -13,6 +13,7 @@ func (app *application) routes() *mux.Router {
 
 	mux.HandleFunc("/api/users/register", app.CreateUser).Methods("POST")
 	mux.HandleFunc("/api/users/login", app.Login).Methods("POST")
+	mux.HandleFunc("/api/users/logout", app.Logout).Methods("POST")
 
 	mux.HandleFunc("/api/users/me", mid.Auth(app.GetUser)).Methods("GET")
 	mux.HandleFunc("/api/users", mid.Auth(app.GetUsers)).Methods("GET")
