@@ -1,10 +1,13 @@
 import { NavLink } from "react-router";
 import { ITeam } from "../models/Team.interface";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { PowerIcon, UserGroupIcon } from "@heroicons/react/24/outline";
+import { AuthContext } from "./Auth";
 
 const Sidebar: React.FC = () => {
   const [teams, setTeams] = useState<ITeam[]>([]);
   const [loading, setLoading] = useState(true);
+  const auth = useContext(AuthContext);
 
   const Active = ({ isActive }: { isActive: boolean }) =>
     `text-sm ${isActive ? "text-green-300 font-bold" : ""}`
@@ -33,7 +36,10 @@ const Sidebar: React.FC = () => {
         <NavLink className={Active} end to="/teams">Team</NavLink>
       </div>
       <div>
-        <h2 className="font-semibold"> Teams </h2>
+        <div className="flex space-x-4">
+          <UserGroupIcon className="h-6" />
+          <h2 className="font-semibold"> Teams </h2>
+        </div>
         {loading ? <p> Loading items...</p> :
           <ul>
             {teams?.map((team, index) => (
@@ -44,6 +50,10 @@ const Sidebar: React.FC = () => {
           </ul>
         }
         <NavLink className={Active} to={"/teams/create"}> + Create Team </NavLink>
+      </div>
+      <div className="flex space-x-4 cursor-pointer">
+        <PowerIcon className="h-6" onClick={auth?.logout} />
+        <p>Logout</p>
       </div>
     </div>
   )

@@ -23,7 +23,17 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   }
 
-  // useEffect(() => { verifyAuth }, [])
+  const logout = async () => {
+    try {
+      await fetch("http://localhost:3000/api/users/logout", {
+        method: "POST",
+        credentials: "include",
+      });
+      setLoggedIn(false)
+    } catch (err) {
+      console.log(err)
+    }
+  }
 
   return (
     <AuthContext.Provider
@@ -32,7 +42,8 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         loggedIn: loggedIn,
         onFailure() {
           return setLoggedIn(false);
-        }
+        },
+        logout: logout
       }}
     >
       {loggedIn ? children : <Login />}

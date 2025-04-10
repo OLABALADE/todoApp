@@ -10,7 +10,7 @@ export interface ITask {
   dueDate: string,
   creator?: string,
   assignee?: User,
-  teamId: number | string,
+  teamId?: number | string,
   created?: Date,
 }
 

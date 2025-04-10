@@ -1,6 +1,7 @@
 import React, { SetStateAction } from "react";
 import { ITask } from "../../models/Task.interface";
 import AssignTask from "../team/AssignTask";
+import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import { Link } from "react-router";
 
 interface TeamTaskListProps {
@@ -47,18 +48,16 @@ const TeamTaskList: React.FC<TeamTaskListProps> = ({ tasks, teamId, setTasks }) 
                   <p className="text-sm font-meduim"> Priority: {task.priority}</p>
                   <p className="text-sm font-meduim"> DueDate: {task.dueDate}</p>
                   <p className="text-sm font-meduim"> Assignee: {task.assignee?.username}</p>
-                  <button
-                    className="bg-blue-400 text-white rounded-lg px-3 mt-3 font-semibold"
-                    onClick={e => deleteTask(e, task?.id)}
-                  >
-                    Delete Task
-                  </button>
-                  <Link
-                    to={`/teams/${task.teamId}/tasks/${task.id}/edit`}
-                    className="bg-blue-400 text-white rounded-lg px-3 mt-3 font-semibold"
-                  >
-                    Edit Team
-                  </Link>
+                  <div className="flex space-x-2">
+                    <TrashIcon className="h-7 :hover bg-red"
+                      onClick={e => deleteTask(e, task?.id)}
+                    />
+                    <Link
+                      to={`/teams/${task.teamId}/tasks/${task.id}/edit`}
+                    >
+                      <PencilSquareIcon className="h-7" />
+                    </Link>
+                  </div>
                 </div>
               </li>
             ))}
@@ -66,7 +65,7 @@ const TeamTaskList: React.FC<TeamTaskListProps> = ({ tasks, teamId, setTasks }) 
         }
       </div>
       <AssignTask teamId={teamId} addTask={addTask} />
-    </div>
+    </div >
   )
 }
 

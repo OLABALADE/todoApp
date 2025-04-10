@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
-import TaskList from "../components/Task";
-import { PersonalTaskForm } from "../components/Form";
 import { ITask } from "../models/Task.interface";
+import PersonalTaskList from "../components/task/PersonalTaskList";
 
 const PersonalTasks: React.FC = () => {
   const [personalTasks, setPersonalTasks] = useState<ITask[]>();
-  const [message, setMessage] = useState("");
 
   useEffect(() => {
     const fetchTasks = async () => {
@@ -17,27 +15,18 @@ const PersonalTasks: React.FC = () => {
         setPersonalTasks(data);
       } catch (err) {
         console.log(err);
-        setMessage("Something went wrong while fetching tasks");
       }
     }
     fetchTasks();
   }, [])
 
-  const addPersonalTask = (newTask: ITask) => {
-    setPersonalTasks(prev => ([...prev, newTask]))
-  }
-
-  const deletePersonalTask = (id: number) => {
-    const newTasks = personalTasks?.filter(task => task.id !== id);
-    setPersonalTasks(newTasks);
-  }
-
   return (
     <div className="flex min-h-screen">
       <div className="flex flex-col justify-center items-center p-6 w-full">
-        <TaskList tasks={personalTasks} deleteTask={deletePersonalTask} />
-        <PersonalTaskForm addTask={addPersonalTask} />
-        <p> {message} </p>
+        <PersonalTaskList
+          tasks={personalTasks}
+          setTasks={setPersonalTasks}
+        />
       </div>
     </div>
   )
