@@ -18,7 +18,10 @@ type TeamResponse struct {
 }
 
 type MemberRequest struct {
-	UserId int `json:"userId"`
+	Users []struct {
+		UserId   int    `json:"userId"`
+		Username string `json:"username"`
+	} `json:"users"`
 }
 
 type MemberResponse struct {

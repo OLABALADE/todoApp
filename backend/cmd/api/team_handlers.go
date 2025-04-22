@@ -49,6 +49,7 @@ func (app *application) CreateTeam(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) GetTeam(w http.ResponseWriter, r *http.Request) {
+	// userId := r.Context().Value(middleware.ContextKey("userId")).(int)
 	vars := mux.Vars(r)
 	id, _ := vars["teamId"]
 
@@ -159,11 +160,13 @@ func (app *application) AddMemberToTeam(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	err = app.teams.AddMember(teamId, mr.UserId, "member")
-	if err != nil {
-		log.Println("Failed to add member to group:", err)
-		http.Error(w, "Failed to add member to group", http.StatusInternalServerError)
-		return
+	for _, user := range mr.Users {
+		err = app.teams.AddMember(teamId, user.UserId, "member")
+		if err != nil {
+			log.Println("Failed to add member to group:", err)
+			http.Error(w, "Failed to add member to group", http.StatusInternalServerError)
+			return
+		}
 	}
 	w.Write([]byte("Member added successfully"))
 }

@@ -10,6 +10,7 @@ func (app *application) routes() *mux.Router {
 	mux := mux.NewRouter()
 	mux.HandleFunc("/", app.home).Methods("GET")
 	mux.HandleFunc("/api/auth/verify-token", app.VerifyToken).Methods("GET")
+	mux.HandleFunc("/api/teams/{teamId}/role", mid.Auth(app.GetCurrentUserRole)).Methods("GET")
 
 	mux.HandleFunc("/api/users/register", app.CreateUser).Methods("POST")
 	mux.HandleFunc("/api/users/login", app.Login).Methods("POST")

@@ -39,6 +39,27 @@ func (app *application) VerifyToken(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("Token is valid"))
 }
 
+func (app *application) GetCurrentUserRole(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(middleware.ContextKey("userId")).(int)
+	tId, _ := mux.Vars(r)["teamId"]
+	teamId, err := strconv.Atoi(tId)
+	if err != nil {
+		log.Println("Invalid URL:", err)
+		http.Error(w, "Bad Request", http.StatusInternalServerError)
+		return
+	}
+
+	role, err := app.users.GetUserRole(userId, teamId)
+	if err != nil {
+		log.Println("Error while getting current user:", err)
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		return
+	}
+	json.NewEncoder(w).Encode(map[string]string{
+		"role": role,
+	})
+}
+
 func (app *application) CreateUser(w http.ResponseWriter, r *http.Request) {
 	var cred auth.Credentials
 	if err := json.NewDecoder(r.Body).Decode(&cred); err != nil {

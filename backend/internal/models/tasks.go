@@ -2,6 +2,9 @@ package models
 
 import (
 	"context"
+	"fmt"
+	"strings"
+
 	"github.com/OLABALADE/todoApp/backend/internal/schemas"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -254,35 +257,63 @@ func (m *TaskModel) GetTeamTask(teamId, taskId int) (*schemas.TaskResponse, erro
 }
 
 func (m *TaskModel) UpdateTeamTask(tr *schemas.TaskRequest) (*schemas.TaskResponse, error) {
-	stmt := `update tasks set
-  title = $1, 
-  description = $2, 
-  task_type = $3,
-  status = $4,
-  priority = $5,
-  due_date = $6
-  where team_id = $7`
+	updateFields := []string{}
+	args := []interface{}{}
+	argIndex := 1
+	if tr.Title != "" {
+		updateFields = append(updateFields, fmt.Sprintf("title = $%d", argIndex))
+		args = append(args, tr.Title)
+		argIndex++
+	}
 
-	_, err := m.DB.Exec(context.Background(), stmt,
-		tr.Title,
-		tr.Description,
-		tr.Type,
-		tr.Status,
-		tr.Priority,
-		tr.DueDate,
-		tr.TeamId)
+	if tr.Description != "" {
+		updateFields = append(updateFields, fmt.Sprintf("description = $%d", argIndex))
+		args = append(args, tr.Description)
+		argIndex++
+	}
+
+	if tr.Type != "" {
+		updateFields = append(updateFields, fmt.Sprintf("task_type = $%d", argIndex))
+		args = append(args, tr.Type)
+		argIndex++
+	}
+
+	if tr.Status != "" {
+		updateFields = append(updateFields, fmt.Sprintf("status = $%d", argIndex))
+		args = append(args, tr.Status)
+		argIndex++
+	}
+
+	if tr.Priority != "" {
+		updateFields = append(updateFields, fmt.Sprintf("priority = $%d", argIndex))
+		args = append(args, tr.Status)
+		argIndex++
+	}
+
+	if !tr.DueDate.IsZero() {
+		updateFields = append(updateFields, fmt.Sprintf("due_date = $%d", argIndex))
+		args = append(args, tr.DueDate)
+		argIndex++
+	}
+
+	args = append(args, tr.Id)
+	stmt := fmt.Sprintf(`update tasks set %s where id = %d`, strings.Join(updateFields, ","), argIndex)
+
+	_, err := m.DB.Exec(context.Background(), stmt, args...)
 
 	if err != nil {
 		return nil, err
 	}
 
-	stmt = `UPDATE task_assignments
+	if tr.AssigneeId != 0 {
+		stmt = `UPDATE task_assignments
   SET user_id = $1
   WHERE task_id = $2`
 
-	_, err = m.DB.Exec(context.Background(), stmt, tr.AssigneeId, tr.Id)
-	if err != nil {
-		return nil, err
+		_, err = m.DB.Exec(context.Background(), stmt, tr.AssigneeId, tr.Id)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	updatedTask, err := m.GetTeamTask(tr.TeamId, tr.Id)

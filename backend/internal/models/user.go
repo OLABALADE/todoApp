@@ -22,14 +22,13 @@ type UserModel struct {
 }
 
 func (m *UserModel) GetUser(id int) (*User, error) {
-	stmt := "select * from users where id = $1"
+	stmt := "select id, name, email,created_at from users where id = $1"
 	row := m.DB.QueryRow(context.Background(), stmt, id)
 	user := &User{}
 	err := row.Scan(
 		&user.Id,
 		&user.Name,
 		&user.Email,
-		&user.Password,
 		&user.Created,
 	)
 	if err != nil {
@@ -37,6 +36,17 @@ func (m *UserModel) GetUser(id int) (*User, error) {
 	}
 
 	return user, nil
+}
+
+func (m *UserModel) GetUserRole(userId, teamId int) (string, error) {
+	stmt := `select role from team_members where user_id = $1 and team_id = $2`
+	role := ""
+	err := m.DB.QueryRow(context.Background(), stmt, userId, teamId).Scan(&role)
+	if err != nil {
+		return "", nil
+	}
+
+	return role, nil
 }
 
 func (m *UserModel) GetUsers() ([]*User, error) {
