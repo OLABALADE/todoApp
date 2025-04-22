@@ -1,7 +1,12 @@
 import { NavLink } from "react-router";
 import { ITeam } from "../models/Team.interface";
 import { useContext, useEffect, useState } from "react";
-import { Bars4Icon, PowerIcon, UserGroupIcon } from "@heroicons/react/24/outline";
+import {
+  Bars4Icon,
+  HomeIcon,
+  PowerIcon,
+  UserGroupIcon,
+} from "@heroicons/react/24/outline";
 import { AuthContext } from "./Auth";
 
 const Sidebar: React.FC = () => {
@@ -13,29 +18,29 @@ const Sidebar: React.FC = () => {
     if (window.innerWidth < 768) {
       setSidebarOpen(false);
     }
-  }
+  };
 
   const Active = ({ isActive }: { isActive: boolean }) =>
-    `text-sm ${isActive ? "text-green-300 font-bold" : ""}`
+    `text-sm ${isActive ? "text-green-300 rounded-lg font-bold" : ""}`;
 
   useEffect(() => {
     const fetchTeams = async () => {
       try {
         const response = await fetch(`http://localhost:3000/api/teams`, {
           credentials: "include",
-        })
+        });
         const data: ITeam[] = await response.json();
         setTeams(data);
         setLoading(false);
       } catch (err) {
-        console.log(err)
+        console.log(err);
       }
-    }
+    };
     fetchTeams();
-  }, [])
+  }, []);
 
   return (
-    <>
+    <div>
       <Bars4Icon
         onClick={() => setSidebarOpen(true)}
         className="p-3 h-10 fixed top-4 left-2 z-50 bg-gray-800 text-white rounded-md shadow-md md:hidden"
@@ -58,8 +63,18 @@ const Sidebar: React.FC = () => {
         </div>
 
         <div className="flex flex-col space-y-2 border-b-4">
+          <div className="flex items-center space-x-3">
+            <HomeIcon className="h-4" />
+            <NavLink onClick={handleClicks} className={Active} to="/dashboard">
+              Dashboard
+            </NavLink>
+          </div>
           <h2 className="font-semibold">Tasks</h2>
-          <NavLink onClick={handleClicks} className={Active} to="/personal/tasks">
+          <NavLink
+            onClick={handleClicks}
+            className={Active}
+            to="/personal/tasks"
+          >
             Personal
           </NavLink>
           <NavLink onClick={handleClicks} className={Active} end to="/teams">
@@ -79,7 +94,11 @@ const Sidebar: React.FC = () => {
             <ul>
               {teams?.map((team: any, index: number) => (
                 <li key={index}>
-                  <NavLink onClick={handleClicks} className={Active} to={`/teams/${team.teamId}`}>
+                  <NavLink
+                    onClick={handleClicks}
+                    className={Active}
+                    to={`/teams/${team.teamId}`}
+                  >
                     {team.name}
                   </NavLink>
                 </li>
@@ -87,7 +106,11 @@ const Sidebar: React.FC = () => {
             </ul>
           )}
 
-          <NavLink onClick={handleClicks} className={Active} to={"/teams/create"}>
+          <NavLink
+            onClick={handleClicks}
+            className={Active}
+            to={"/teams/create"}
+          >
             + Create Team
           </NavLink>
         </div>
@@ -100,8 +123,8 @@ const Sidebar: React.FC = () => {
           <p>Logout</p>
         </div>
       </div>
-    </>
-  )
-}
+    </div>
+  );
+};
 
 export default Sidebar;

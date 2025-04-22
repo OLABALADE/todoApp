@@ -1,14 +1,15 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ITask } from "../../models/Task.interface";
 import TeamTaskList from "../../components/task/TeamTaskList";
 import { useParams } from "react-router";
-import { AuthContext } from "../../components/Auth";
+import { useAuth } from "../../components/Auth";
 
 const TeamTasks: React.FC = () => {
   const { id } = useParams();
   const [tasks, setTasks] = useState<ITask[]>([]);
   const [loading, setLoading] = useState(true);
-  const auth = useContext(AuthContext);
+  const [role, setRole] = useState<string | undefined>();
+  const { getTeamRole, onFailure } = useAuth();
 
 
   useEffect(() => {
@@ -18,10 +19,12 @@ const TeamTasks: React.FC = () => {
           credentials: "include",
         })
         if (response.status === 401) {
-          auth?.onFailure();
+          onFailure();
         }
         const data: ITask[] = await response.json();
         setTasks(data);
+        const res = await getTeamRole(id);
+        setRole(res)
         setLoading(false);
       } catch (err) {
         console.log(err);
@@ -36,6 +39,7 @@ const TeamTasks: React.FC = () => {
 
   return (
     <TeamTaskList
+      role={role}
       teamId={Number(id)}
       tasks={tasks}
       setTasks={setTasks}
