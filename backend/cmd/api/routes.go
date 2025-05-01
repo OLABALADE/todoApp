@@ -23,6 +23,8 @@ func (app *application) routes() *mux.Router {
 
 	mux.HandleFunc("/api/tasks", mid.Auth(app.CreatePersonalTask)).Methods("POST")
 	mux.HandleFunc("/api/tasks", mid.Auth(app.GetPersonalTasks)).Methods("GET")
+	mux.HandleFunc("/api/tasks/recent-tasks", mid.Auth(app.GetRecentTasks)).Methods("GET")
+	mux.HandleFunc("/api/tasks/urgent-tasks", mid.Auth(app.GetUrgentTasks)).Methods("GET")
 	mux.HandleFunc("/api/tasks/{taskId}", mid.Auth(app.GetPersonalTask)).Methods("GET")
 	mux.HandleFunc("/api/tasks/{taskId}", mid.Auth(app.UpdatePersonalTask)).Methods("PUT")
 	mux.HandleFunc("/api/tasks/{taskId}", mid.Auth(app.DeletePersonalTask)).Methods("DELETE")

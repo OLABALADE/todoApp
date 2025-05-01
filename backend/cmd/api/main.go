@@ -3,10 +3,10 @@ package main
 import (
 	"context"
 	"crypto/tls"
-	"flag"
 	"fmt"
 	"github.com/OLABALADE/todoApp/backend/internal/models"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/joho/godotenv"
 	"github.com/rs/cors"
 	"log"
 	"net/http"
@@ -24,8 +24,10 @@ type application struct {
 var db *pgxpool.Pool
 
 func main() {
-	addr := flag.String("addr", ":3000", "Port Number")
-	flag.Parse()
+	err := godotenv.Load("../.env")
+	if err != nil {
+		log.Fatal("Unable to load .env file:", err)
+	}
 
 	poolConfig, err := pgxpool.ParseConfig(os.Getenv("DATABASE_URL"))
 	if err != nil {
@@ -56,7 +58,7 @@ func main() {
 	})
 
 	server := http.Server{
-		Addr:         *addr,
+		Addr:         os.Getenv("PORT"),
 		Handler:      corsMid.Handler(App.routes()),
 		TLSConfig:    tlsConfig,
 		IdleTimeout:  time.Minute,
@@ -65,5 +67,5 @@ func main() {
 	}
 
 	fmt.Println("Listening at port", server.Addr)
-	http.ListenAndServe(*addr, server.Handler)
+	http.ListenAndServe(os.Getenv("PORT"), server.Handler)
 }

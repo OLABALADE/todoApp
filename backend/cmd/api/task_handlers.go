@@ -262,6 +262,30 @@ func (app *application) DeleteTeamTask(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (app *application) GetRecentTasks(w http.ResponseWriter, r *http.Request) {
+	userId, _ := r.Context().Value(middleware.ContextKey("userId")).(int)
+	recentTasks, err := app.tasks.GetRecentTasks(userId)
+	if err != nil {
+		log.Println("Error while getting recent tasks:", err)
+		http.Error(w, "Error while getting recent tasks", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(recentTasks)
+}
+
+func (app *application) GetUrgentTasks(w http.ResponseWriter, r *http.Request) {
+	userId, _ := r.Context().Value(middleware.ContextKey("userId")).(int)
+	recentTasks, err := app.tasks.GetUrgentTasks(userId)
+	if err != nil {
+		log.Println("Error while getting recent tasks:", err)
+		http.Error(w, "Error while getting recent tasks", http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(recentTasks)
+}
+
 /* // //////////////////// Project Tasks //////////////////////////
 func (app *application) CreateProjectTask(w http.ResponseWriter, r *http.Request) {
 	userId, _ := r.Context().Value(middleware.ContextKey("userId")).(int)

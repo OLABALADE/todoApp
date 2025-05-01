@@ -3,15 +3,24 @@ package models
 import (
 	"context"
 	"fmt"
-	"strings"
-
 	"github.com/OLABALADE/todoApp/backend/internal/schemas"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"strings"
+	"time"
 )
 
 type TaskModel struct {
 	DB *pgxpool.Pool
+}
+
+type DashboardTask struct {
+	Id       string    `json:"id"`
+	Title    string    `json:"title"`
+	Status   string    `json:"status"`
+	DueDate  time.Time `json:"dueDate"`
+	TeamID   string    `json:"teamId,omitempty"`
+	TeamName string    `json:"teamName,omitempty"`
 }
 
 func (m *TaskModel) InsertPersonalTask(tr *schemas.TaskRequest) (int, error) {
@@ -181,7 +190,7 @@ func (m *TaskModel) GetTeamTasks(teamId int) ([]*schemas.TaskResponse, error) {
   u.id,
   u.name
   from tasks tk join task_assignments ta on tk.id = ta.task_id
-  join users u on u.id = ta.user_id where tk.team_id = $1`
+  join users u on u.id = ta.user_id where tk.team_id = $1 order by tk.id`
 
 	rows, err := m.DB.Query(context.Background(), stmt, teamId)
 	if err != nil {
@@ -286,7 +295,7 @@ func (m *TaskModel) UpdateTeamTask(tr *schemas.TaskRequest) (*schemas.TaskRespon
 
 	if tr.Priority != "" {
 		updateFields = append(updateFields, fmt.Sprintf("priority = $%d", argIndex))
-		args = append(args, tr.Status)
+		args = append(args, tr.Priority)
 		argIndex++
 	}
 
@@ -297,7 +306,7 @@ func (m *TaskModel) UpdateTeamTask(tr *schemas.TaskRequest) (*schemas.TaskRespon
 	}
 
 	args = append(args, tr.Id)
-	stmt := fmt.Sprintf(`update tasks set %s where id = %d`, strings.Join(updateFields, ","), argIndex)
+	stmt := fmt.Sprintf(`update tasks set %s where id = $%d`, strings.Join(updateFields, ","), argIndex)
 
 	_, err := m.DB.Exec(context.Background(), stmt, args...)
 
@@ -331,6 +340,91 @@ func (m *TaskModel) DeleteTeamTask(teamId, taskId int) error {
 		return err
 	}
 	return nil
+}
+
+func (m *TaskModel) GetRecentTasks(userId int) (*[]DashboardTask, error) {
+	var teamIds []string
+	stmt := `select team_id from team_members where user_id = $1`
+	rows, err := m.DB.Query(context.Background(), stmt, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var id string
+		rows.Scan(&id)
+		teamIds = append(teamIds, id)
+	}
+
+	stmt = `SELECT 
+    t.id, 
+    t.title, 
+    t.status, 
+    t.due_date, 
+    t.team_id,
+    teams.name AS team_name
+    FROM tasks t
+    INNER JOIN task_assignments ta ON t.id = ta.task_id
+    LEFT JOIN teams ON t.team_id = teams.id
+    WHERE ta.user_id = $1
+      AND t.status != 'completed'
+    ORDER BY t.due_date ASC
+    LIMIT 10;
+`
+	var tasks []DashboardTask
+	rows, err = m.DB.Query(context.Background(), stmt, userId)
+	for rows.Next() {
+		var t DashboardTask
+		err := rows.Scan(&t.Id, &t.Title, &t.Status, &t.DueDate, &t.TeamID, &t.TeamName)
+		if err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, t)
+	}
+	return &tasks, nil
+}
+
+func (m *TaskModel) GetUrgentTasks(userId int) (*[]DashboardTask, error) {
+	var teamIds []string
+	stmt := `select team_id from team_members where user_id = $1`
+	rows, err := m.DB.Query(context.Background(), stmt, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	for rows.Next() {
+		var id string
+		rows.Scan(&id)
+		teamIds = append(teamIds, id)
+	}
+
+	daysLeft := time.Now().Add(time.Hour * 24 * 2 * -1).Format("2006-01-02")
+	stmt = `SELECT 
+    t.id, 
+    t.title, 
+    t.status, 
+    t.due_date, 
+    t.team_id,
+    teams.name AS team_name
+    FROM tasks t
+    INNER JOIN task_assignments ta ON t.id = ta.task_id
+    LEFT JOIN teams ON t.team_id = teams.id
+    WHERE ta.user_id = $1
+      AND t.status != 'completed' AND t.due_date <= $2
+    ORDER BY t.due_date ASC
+    LIMIT 10;
+`
+	var tasks []DashboardTask
+	rows, err = m.DB.Query(context.Background(), stmt, userId, daysLeft)
+	for rows.Next() {
+		var t DashboardTask
+		err := rows.Scan(&t.Id, &t.Title, &t.Status, &t.DueDate, &t.TeamID, &t.TeamName)
+		if err != nil {
+			return nil, err
+		}
+		tasks = append(tasks, t)
+	}
+	return &tasks, nil
 }
 
 // ///////////////  Project Tasks ////////////////
