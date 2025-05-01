@@ -21,7 +21,7 @@ const Sidebar: React.FC = () => {
   };
 
   const Active = ({ isActive }: { isActive: boolean }) =>
-    `text-sm ${isActive ? "text-green-300 rounded-lg font-bold" : ""}`;
+    `text-sm ${isActive ? "text-blue-300 rounded-lg font-bold" : ""}`;
 
   useEffect(() => {
     const fetchTeams = async () => {
